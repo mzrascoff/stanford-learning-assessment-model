@@ -1,0 +1,17 @@
+{
+  "name": "@slam/agent",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "build": "npm run build:server && npm run pack",
+    "build:server": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/server/index.js",
+    "pack": "node scripts/build-mcpb.mjs",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@slam/core": "0.1.0",
+    "adm-zip": "^0.5.16"
+  }
+}

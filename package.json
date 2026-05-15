@@ -1,0 +1,29 @@
+{
+  "name": "slam-platform",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm --workspace @slam/core run build && npm --workspace @slam/api run build && npm --workspace @slam/mcp-server run build && npm --workspace @slam/worker run build && npm --workspace @slam/agent run build",
+    "dev:api": "npm --workspace @slam/api run dev",
+    "dev:mcp": "npm --workspace @slam/mcp-server run dev",
+    "dev:worker": "npm --workspace @slam/worker run dev",
+    "dev:agent": "npm --workspace @slam/agent run dev",
+    "deploy:aws": "./deploy/aws/deploy.sh",
+    "test:aws": "./deploy/aws/test.sh",
+    "destroy:aws": "./deploy/aws/destroy.sh",
+    "test": "npm --workspace @slam/core run test"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.10",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

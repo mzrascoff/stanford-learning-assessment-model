@@ -1,0 +1,13 @@
+{
+  "name": "@slam/worker",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/worker.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/worker.ts"
+  },
+  "dependencies": {
+    "@slam/core": "0.1.0"
+  }
+}

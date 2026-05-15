@@ -1,0 +1,16 @@
+{
+  "name": "@slam/api",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "@slam/core": "0.1.0",
+    "adm-zip": "^0.5.16",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
