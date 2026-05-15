@@ -1,0 +1,149 @@
+{
+  "id": "24afccb8-3d67-4d6d-88db-13968501d71b",
+  "tenantId": "tenant-demo",
+  "courseId": "course-educ-240",
+  "title": "EDUC 240 Outcomes Evidence Memo",
+  "description": "A higher-ed assessment conversation demo focused on course outcome evidence, equity-validity checks, and formative next steps.",
+  "durationMinutes": 35,
+  "deliveryMode": "guided",
+  "feedbackVisibility": "instructor_and_student",
+  "rubricDimensions": [
+    {
+      "id": "outcome-evidence-alignment",
+      "label": "Outcome evidence alignment",
+      "category": "cognitive",
+      "scale": {
+        "min": 1,
+        "max": 4,
+        "labels": [
+          "emerging",
+          "developing",
+          "proficient",
+          "advanced"
+        ]
+      },
+      "criteria": [
+        "Maps claims to a stated course or program outcome.",
+        "Uses direct evidence from student work or learning analytics.",
+        "Explains why the evidence is sufficient or insufficient for the outcome."
+      ],
+      "evidenceRequirements": [
+        "At least one named learning outcome",
+        "At least two concrete evidence points from the case materials"
+      ]
+    },
+    {
+      "id": "equity-validity-reasoning",
+      "label": "Equity and validity reasoning",
+      "category": "cognitive",
+      "scale": {
+        "min": 1,
+        "max": 4,
+        "labels": [
+          "emerging",
+          "developing",
+          "proficient",
+          "advanced"
+        ]
+      },
+      "criteria": [
+        "Identifies who may be overrepresented, underrepresented, or misclassified by the measure.",
+        "Distinguishes performance gaps from measurement or access gaps.",
+        "Recommends a validation check before making an instructional decision."
+      ],
+      "evidenceRequirements": [
+        "A subgroup or access-related observation",
+        "A specific validity or bias check"
+      ]
+    },
+    {
+      "id": "metacognitive-calibration",
+      "label": "Metacognitive calibration",
+      "category": "metacognitive",
+      "scale": {
+        "min": 1,
+        "max": 4,
+        "labels": [
+          "emerging",
+          "developing",
+          "proficient",
+          "advanced"
+        ]
+      },
+      "criteria": [
+        "Tracks confidence in the interpretation.",
+        "Names what remains uncertain or incomplete.",
+        "Plans a concrete next check or revision."
+      ],
+      "evidenceRequirements": [
+        "A confidence or uncertainty statement",
+        "A revision, verification, or stakeholder follow-up plan"
+      ]
+    }
+  ],
+  "anchorExamples": [
+    {
+      "id": "anchor-outcome-evidence-alignment-advanced",
+      "dimensionId": "outcome-evidence-alignment",
+      "performanceLevel": "advanced",
+      "excerpt": "The memo names the target outcome, uses pass-rate and subgroup evidence, and explains why a rubric artifact sample is needed before concluding mastery.",
+      "rationale": "Strong evidence alignment connects the course outcome, direct student artifacts, and limits of the available measure."
+    },
+    {
+      "id": "anchor-equity-validity-reasoning-advanced",
+      "dimensionId": "equity-validity-reasoning",
+      "performanceLevel": "advanced",
+      "excerpt": "The response treats the first-generation gap as a signal to investigate access and scoring consistency, not as a fixed learner deficit.",
+      "rationale": "Advanced validity reasoning separates learning needs from possible measurement and opportunity-to-learn effects."
+    },
+    {
+      "id": "anchor-metacognitive-calibration-advanced",
+      "dimensionId": "metacognitive-calibration",
+      "performanceLevel": "advanced",
+      "excerpt": "The learner states confidence, identifies missing rubric artifacts, and proposes a concrete moderation check before final recommendations.",
+      "rationale": "Calibration is visible when uncertainty changes the next evidence-gathering step."
+    }
+  ],
+  "promptSequence": [
+    {
+      "id": "outcomes-memo",
+      "title": "Outcomes evidence memo",
+      "prompt": "You are advising a gateway biology instructor. Write a short evidence memo about whether students are meeting the outcome: 'Interpret experimental results and justify a claim with evidence.' Use the provided dashboard: section average 72 percent, first-generation students 64 percent, continuing-generation students 78 percent, lab-note completion 91 percent, and claim-evidence rubric pass rate 58 percent.",
+      "responseType": "text",
+      "guidance": "Tie each claim to a learning outcome and at least two evidence points. Separate outcome performance from possible measurement limitations.",
+      "targetDimensionIds": [
+        "outcome-evidence-alignment",
+        "equity-validity-reasoning"
+      ]
+    },
+    {
+      "id": "assessment-action",
+      "title": "Assessment action plan",
+      "prompt": "Recommend one near-term assessment action and one instructional follow-up. Explain what outcome signal each action would strengthen and what equity or validity risk it would reduce.",
+      "responseType": "text",
+      "guidance": "Prefer specific checks, such as rubric moderation, disaggregated item review, artifact sampling, or a targeted revision opportunity.",
+      "targetDimensionIds": [
+        "outcome-evidence-alignment",
+        "equity-validity-reasoning"
+      ]
+    },
+    {
+      "id": "calibration-note",
+      "title": "Calibration note",
+      "prompt": "Record your confidence, what you are uncertain about, and how you would verify or revise the recommendation before sharing it with the program assessment committee.",
+      "responseType": "reflection",
+      "guidance": "Name one confidence level, one uncertainty, and one next verification step.",
+      "targetDimensionIds": [
+        "metacognitive-calibration"
+      ]
+    }
+  ],
+  "artifactTypes": [
+    "text/plain",
+    "text/markdown"
+  ],
+  "createdBy": "SLAM Demo Instructor",
+  "createdAt": "2026-05-15T20:09:49.854Z",
+  "updatedAt": "2026-05-15T20:09:49.854Z",
+  "version": 1
+}

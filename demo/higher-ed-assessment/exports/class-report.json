@@ -1,0 +1,98 @@
+{
+  "id": "class-report-24afccb8-3d67-4d6d-88db-13968501d71b",
+  "tenantId": "tenant-demo",
+  "assessmentId": "24afccb8-3d67-4d6d-88db-13968501d71b",
+  "generatedAt": "2026-05-15T20:09:49.967Z",
+  "sessionCount": 6,
+  "evaluatedCount": 6,
+  "aggregateDimensions": [
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "label": "Outcome evidence alignment",
+      "averageScore": 3.33,
+      "averageConfidence": 0.81,
+      "belowTargetCount": 1,
+      "strengths": [
+        "Outcome evidence alignment is supported by explicit evidence and reasoning.",
+        "The response addresses maps claims to a stated course or program outcome..",
+        "Outcome evidence alignment is supported by explicit evidence and reasoning."
+      ],
+      "misconceptions": [
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "A clearer connection between the work and the rubric criteria would improve confidence."
+      ]
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "label": "Equity and validity reasoning",
+      "averageScore": 3.33,
+      "averageConfidence": 0.81,
+      "belowTargetCount": 1,
+      "strengths": [
+        "Equity and validity reasoning is supported by explicit evidence and reasoning.",
+        "The response addresses identifies who may be overrepresented, underrepresented, or misclassified by the measure..",
+        "Equity and validity reasoning is supported by explicit evidence and reasoning."
+      ],
+      "misconceptions": [
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "A clearer connection between the work and the rubric criteria would improve confidence."
+      ]
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "label": "Metacognitive calibration",
+      "averageScore": 3.17,
+      "averageConfidence": 0.74,
+      "belowTargetCount": 1,
+      "strengths": [
+        "Metacognitive calibration is supported by explicit evidence and reasoning.",
+        "The response addresses tracks confidence in the interpretation..",
+        "Metacognitive calibration is supported by explicit evidence and reasoning."
+      ],
+      "misconceptions": [
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "A clearer connection between the work and the rubric criteria would improve confidence.",
+        "Stronger evidence is needed for metacognitive calibration."
+      ]
+    }
+  ],
+  "misconceptionClusters": [
+    "Outcome evidence alignment: A clearer connection between the work and the rubric criteria would improve confidence.",
+    "Equity and validity reasoning: A clearer connection between the work and the rubric criteria would improve confidence.",
+    "Metacognitive calibration: A clearer connection between the work and the rubric criteria would improve confidence."
+  ],
+  "exemplarSnippets": [
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "studentAlias": "Learner 1",
+      "quote": "The outcome is not just general biology success; it is the ability to interpret results and justify a claim with evidence. I would not use the 72 percent section average alone bec…"
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "studentAlias": "Learner 1",
+      "quote": "The outcome is not just general biology success; it is the ability to interpret results and justify a claim with evidence. I would not use the 72 percent section average alone bec…"
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "studentAlias": "Learner 1",
+      "quote": "I would verify my recommendation by sampling actual lab notes, double-checking rubric reliability, and asking whether students saw anchor examples before the task. If those checks…"
+    },
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "studentAlias": "Learner 2",
+      "quote": "The evidence suggests a partial outcome gap. The 72 percent average makes the course look acceptable, but the relevant outcome asks students to justify claims with evidence, and o…"
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "studentAlias": "Learner 2",
+      "quote": "The evidence suggests a partial outcome gap. The 72 percent average makes the course look acceptable, but the relevant outcome asks students to justify claims with evidence, and o…"
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "studentAlias": "Learner 2",
+      "quote": "I would test the recommendation by comparing scores before and after a worked-example revision. I am uncertain about whether the existing rubric was calibrated, so I would ask for…"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "id": "report-3b4b80ca-96d4-49ac-99e8-6daeb0ac03fd",
+  "tenantId": "tenant-demo",
+  "assessmentId": "24afccb8-3d67-4d6d-88db-13968501d71b",
+  "sessionId": "3b4b80ca-96d4-49ac-99e8-6daeb0ac03fd",
+  "studentId": "student-005",
+  "studentName": "Diego Nguyen",
+  "generatedAt": "2026-05-15T20:09:49.940Z",
+  "formativeOnly": true,
+  "rubricVersion": 1,
+  "promptVersion": 1,
+  "evaluatorVersion": "slam-heuristic-evaluator@0.1.0",
+  "modelSettingsVersion": "rubric-plus-anchors-v1",
+  "generatedFromEventVersion": 10,
+  "overallSummary": "The learner shows emerging-to-strong evidence across most configured dimensions with clear opportunities for refinement.",
+  "metacognitiveSignals": [
+    "Confidence was tracked during the session.",
+    "The learner included self-reflection or monitoring language."
+  ],
+  "submittedArtifacts": [
+    "student-005-outcomes-notes.md"
+  ],
+  "dimensionResults": [
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "label": "Outcome evidence alignment",
+      "category": "cognitive",
+      "score": 4,
+      "scaleMax": 4,
+      "confidence": 0.9,
+      "summary": "Outcome evidence alignment is currently a relative strength in this assessment.",
+      "strengths": [
+        "Outcome evidence alignment is supported by explicit evidence and reasoning.",
+        "The response addresses maps claims to a stated course or program outcome.."
+      ],
+      "gaps": [
+        "A clearer connection between the work and the rubric criteria would improve confidence."
+      ],
+      "nextSteps": [
+        "Revise with focus on maps claims to a stated course or program outcome..",
+        "Add one explicit note showing how you checked or improved your work for outcome evidence alignment."
+      ],
+      "evidence": [
+        {
+          "eventId": "601f54a2-e536-49af-b412-d3a112c599e5",
+          "promptId": "outcomes-memo",
+          "quote": "The outcome evidence is mixed because average performance and completion are not the same as claim-evidence mastery. I would privilege the 58 percent rubric pass rate because it d…",
+          "rationale": "Evidence for outcome evidence alignment drawn from response submitted."
+        },
+        {
+          "eventId": "2ef99cb6-6130-4855-92b0-acf2f749d7ad",
+          "promptId": "assessment-action",
+          "quote": "Near term, run a disaggregated rubric audit with two raters and compare which rubric rows drive failures. Instructionally, assign a 15-minute claim revision using one common data …",
+          "rationale": "Evidence for outcome evidence alignment drawn from response submitted."
+        },
+        {
+          "eventId": "85a6ca93-6258-43cc-99f1-d217efcddcc7",
+          "quote": "The main uncertainty is whether the rubric pass rate was reliable. I would verify with interrater agreement and revise the plan if raters disagree. I would also monitor whether co…",
+          "rationale": "Evidence for outcome evidence alignment drawn from reflection submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "label": "Equity and validity reasoning",
+      "category": "cognitive",
+      "score": 4,
+      "scaleMax": 4,
+      "confidence": 0.9,
+      "summary": "Equity and validity reasoning is currently a relative strength in this assessment.",
+      "strengths": [
+        "Equity and validity reasoning is supported by explicit evidence and reasoning.",
+        "The response addresses identifies who may be overrepresented, underrepresented, or misclassified by the measure.."
+      ],
+      "gaps": [
+        "A clearer connection between the work and the rubric criteria would improve confidence."
+      ],
+      "nextSteps": [
+        "Revise with focus on identifies who may be overrepresented, underrepresented, or misclassified by the measure..",
+        "Add one explicit note showing how you checked or improved your work for equity and validity reasoning."
+      ],
+      "evidence": [
+        {
+          "eventId": "601f54a2-e536-49af-b412-d3a112c599e5",
+          "promptId": "outcomes-memo",
+          "quote": "The outcome evidence is mixed because average performance and completion are not the same as claim-evidence mastery. I would privilege the 58 percent rubric pass rate because it d…",
+          "rationale": "Evidence for equity and validity reasoning drawn from response submitted."
+        },
+        {
+          "eventId": "2ef99cb6-6130-4855-92b0-acf2f749d7ad",
+          "promptId": "assessment-action",
+          "quote": "Near term, run a disaggregated rubric audit with two raters and compare which rubric rows drive failures. Instructionally, assign a 15-minute claim revision using one common data …",
+          "rationale": "Evidence for equity and validity reasoning drawn from response submitted."
+        },
+        {
+          "eventId": "85a6ca93-6258-43cc-99f1-d217efcddcc7",
+          "quote": "The main uncertainty is whether the rubric pass rate was reliable. I would verify with interrater agreement and revise the plan if raters disagree. I would also monitor whether co…",
+          "rationale": "Evidence for equity and validity reasoning drawn from reflection submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "label": "Metacognitive calibration",
+      "category": "metacognitive",
+      "score": 4,
+      "scaleMax": 4,
+      "confidence": 0.85,
+      "summary": "Metacognitive calibration is currently a relative strength in this assessment.",
+      "strengths": [
+        "Metacognitive calibration is supported by explicit evidence and reasoning.",
+        "The response addresses tracks confidence in the interpretation.."
+      ],
+      "gaps": [
+        "A clearer connection between the work and the rubric criteria would improve confidence."
+      ],
+      "nextSteps": [
+        "Revise with focus on tracks confidence in the interpretation..",
+        "Add one explicit note showing how you checked or improved your work for metacognitive calibration."
+      ],
+      "evidence": [
+        {
+          "eventId": "85a6ca93-6258-43cc-99f1-d217efcddcc7",
+          "quote": "The main uncertainty is whether the rubric pass rate was reliable. I would verify with interrater agreement and revise the plan if raters disagree. I would also monitor whether co…",
+          "rationale": "Evidence for metacognitive calibration drawn from reflection submitted."
+        },
+        {
+          "eventId": "294650b9-182d-44bf-9706-161f166684be",
+          "quote": "Committee-ready recommendation: do not report final outcome attainment until a disaggregated rubric audit and short reassessment confirm the signal.",
+          "rationale": "Evidence for metacognitive calibration drawn from artifact uploaded."
+        }
+      ]
+    }
+  ]
+}

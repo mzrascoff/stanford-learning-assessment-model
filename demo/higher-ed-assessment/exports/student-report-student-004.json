@@ -1,0 +1,119 @@
+{
+  "id": "report-55018f1b-b544-4661-8d7d-0964b1e2fece",
+  "tenantId": "tenant-demo",
+  "assessmentId": "24afccb8-3d67-4d6d-88db-13968501d71b",
+  "sessionId": "55018f1b-b544-4661-8d7d-0964b1e2fece",
+  "studentId": "student-004",
+  "studentName": "Samira Lee",
+  "generatedAt": "2026-05-15T20:09:49.919Z",
+  "formativeOnly": true,
+  "rubricVersion": 1,
+  "promptVersion": 1,
+  "evaluatorVersion": "slam-heuristic-evaluator@0.1.0",
+  "modelSettingsVersion": "rubric-plus-anchors-v1",
+  "generatedFromEventVersion": 8,
+  "overallSummary": "The learner shows emerging-to-strong evidence across most configured dimensions with clear opportunities for refinement.",
+  "metacognitiveSignals": [
+    "Confidence was tracked during the session.",
+    "The learner included self-reflection or monitoring language."
+  ],
+  "submittedArtifacts": [],
+  "dimensionResults": [
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "label": "Outcome evidence alignment",
+      "category": "cognitive",
+      "score": 3,
+      "scaleMax": 4,
+      "confidence": 0.75,
+      "summary": "Outcome evidence alignment is currently a relative strength in this assessment.",
+      "strengths": [
+        "Outcome evidence alignment is supported by explicit evidence and reasoning.",
+        "The response addresses maps claims to a stated course or program outcome.."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for outcome evidence alignment.",
+        "At least one named learning outcome"
+      ],
+      "nextSteps": [
+        "Revise with focus on maps claims to a stated course or program outcome..",
+        "Add one explicit note showing how you checked or improved your work for outcome evidence alignment."
+      ],
+      "evidence": [
+        {
+          "eventId": "1d2f5b03-5143-4024-9b7d-7a50590d6c30",
+          "promptId": "outcomes-memo",
+          "quote": "Students are not meeting the learning outcome because the pass rate is 58 percent. The first-generation score is 64 percent, so that group is behind. The class average is 72 perce…",
+          "rationale": "Evidence for outcome evidence alignment drawn from response submitted."
+        },
+        {
+          "eventId": "d75f88eb-4949-429a-bee8-a1d3888fdd0f",
+          "quote": "I would check actual student work next time and revise the recommendation after seeing examples.",
+          "rationale": "Evidence for outcome evidence alignment drawn from reflection submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "label": "Equity and validity reasoning",
+      "category": "cognitive",
+      "score": 3,
+      "scaleMax": 4,
+      "confidence": 0.75,
+      "summary": "Equity and validity reasoning is currently a relative strength in this assessment.",
+      "strengths": [
+        "Equity and validity reasoning is supported by explicit evidence and reasoning.",
+        "The response addresses identifies who may be overrepresented, underrepresented, or misclassified by the measure.."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for equity and validity reasoning.",
+        "A subgroup or access-related observation"
+      ],
+      "nextSteps": [
+        "Revise with focus on identifies who may be overrepresented, underrepresented, or misclassified by the measure..",
+        "Add one explicit note showing how you checked or improved your work for equity and validity reasoning."
+      ],
+      "evidence": [
+        {
+          "eventId": "1d2f5b03-5143-4024-9b7d-7a50590d6c30",
+          "promptId": "outcomes-memo",
+          "quote": "Students are not meeting the learning outcome because the pass rate is 58 percent. The first-generation score is 64 percent, so that group is behind. The class average is 72 perce…",
+          "rationale": "Evidence for equity and validity reasoning drawn from response submitted."
+        },
+        {
+          "eventId": "d75f88eb-4949-429a-bee8-a1d3888fdd0f",
+          "quote": "I would check actual student work next time and revise the recommendation after seeing examples.",
+          "rationale": "Evidence for equity and validity reasoning drawn from reflection submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "label": "Metacognitive calibration",
+      "category": "metacognitive",
+      "score": 3,
+      "scaleMax": 4,
+      "confidence": 0.7,
+      "summary": "Metacognitive calibration is currently a relative strength in this assessment.",
+      "strengths": [
+        "Metacognitive calibration is supported by explicit evidence and reasoning.",
+        "The response addresses tracks confidence in the interpretation.."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for metacognitive calibration.",
+        "A confidence or uncertainty statement"
+      ],
+      "nextSteps": [
+        "Revise with focus on tracks confidence in the interpretation..",
+        "Add one explicit note showing how you checked or improved your work for metacognitive calibration."
+      ],
+      "evidence": [
+        {
+          "eventId": "d75f88eb-4949-429a-bee8-a1d3888fdd0f",
+          "quote": "I would check actual student work next time and revise the recommendation after seeing examples.",
+          "rationale": "Evidence for metacognitive calibration drawn from reflection submitted."
+        }
+      ]
+    }
+  ]
+}

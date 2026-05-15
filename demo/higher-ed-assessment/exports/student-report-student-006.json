@@ -1,0 +1,100 @@
+{
+  "id": "report-5045b0f8-4b48-4d95-9ada-543a41eade74",
+  "tenantId": "tenant-demo",
+  "assessmentId": "24afccb8-3d67-4d6d-88db-13968501d71b",
+  "sessionId": "5045b0f8-4b48-4d95-9ada-543a41eade74",
+  "studentId": "student-006",
+  "studentName": "Taylor Brooks",
+  "generatedAt": "2026-05-15T20:09:49.960Z",
+  "formativeOnly": true,
+  "rubricVersion": 1,
+  "promptVersion": 1,
+  "evaluatorVersion": "slam-heuristic-evaluator@0.1.0",
+  "modelSettingsVersion": "rubric-plus-anchors-v1",
+  "generatedFromEventVersion": 6,
+  "overallSummary": "The learner has partial evidence across the selected dimensions and would benefit from targeted follow-up prompts and revision guidance.",
+  "metacognitiveSignals": [
+    "No explicit confidence check was recorded.",
+    "No dedicated reflection entry was captured."
+  ],
+  "submittedArtifacts": [],
+  "dimensionResults": [
+    {
+      "dimensionId": "outcome-evidence-alignment",
+      "label": "Outcome evidence alignment",
+      "category": "cognitive",
+      "score": 1,
+      "scaleMax": 4,
+      "confidence": 0.5,
+      "summary": "Outcome evidence alignment shows partial evidence and would benefit from another revision cycle.",
+      "strengths": [
+        "There is some evidence of outcome evidence alignment, especially in the submitted response."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for outcome evidence alignment.",
+        "At least one named learning outcome"
+      ],
+      "nextSteps": [
+        "Revise with focus on maps claims to a stated course or program outcome..",
+        "Add one explicit note showing how you checked or improved your work for outcome evidence alignment."
+      ],
+      "evidence": [
+        {
+          "eventId": "6a380449-b42d-45b4-8b66-47a5843e61d0",
+          "promptId": "outcomes-memo",
+          "quote": "The dashboard says 72 percent, so the outcome is probably okay. The lower first-generation score should be mentioned. The rubric pass rate also looks low.",
+          "rationale": "Evidence for outcome evidence alignment drawn from response submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "equity-validity-reasoning",
+      "label": "Equity and validity reasoning",
+      "category": "cognitive",
+      "score": 1,
+      "scaleMax": 4,
+      "confidence": 0.5,
+      "summary": "Equity and validity reasoning shows partial evidence and would benefit from another revision cycle.",
+      "strengths": [
+        "There is some evidence of equity and validity reasoning, especially in the submitted response."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for equity and validity reasoning.",
+        "A subgroup or access-related observation"
+      ],
+      "nextSteps": [
+        "Revise with focus on identifies who may be overrepresented, underrepresented, or misclassified by the measure..",
+        "Add one explicit note showing how you checked or improved your work for equity and validity reasoning."
+      ],
+      "evidence": [
+        {
+          "eventId": "6a380449-b42d-45b4-8b66-47a5843e61d0",
+          "promptId": "outcomes-memo",
+          "quote": "The dashboard says 72 percent, so the outcome is probably okay. The lower first-generation score should be mentioned. The rubric pass rate also looks low.",
+          "rationale": "Evidence for equity and validity reasoning drawn from response submitted."
+        }
+      ]
+    },
+    {
+      "dimensionId": "metacognitive-calibration",
+      "label": "Metacognitive calibration",
+      "category": "metacognitive",
+      "score": 1,
+      "scaleMax": 4,
+      "confidence": 0.35,
+      "summary": "Metacognitive calibration shows partial evidence and would benefit from another revision cycle.",
+      "strengths": [
+        "There is some evidence of metacognitive calibration, especially in the submitted response."
+      ],
+      "gaps": [
+        "Stronger evidence is needed for metacognitive calibration.",
+        "A confidence or uncertainty statement"
+      ],
+      "nextSteps": [
+        "Revise with focus on tracks confidence in the interpretation..",
+        "Add one explicit note showing how you checked or improved your work for metacognitive calibration."
+      ],
+      "evidence": []
+    }
+  ]
+}

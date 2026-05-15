@@ -12,6 +12,7 @@
     "dev:mcp": "npm --workspace @slam/mcp-server run dev",
     "dev:worker": "npm --workspace @slam/worker run dev",
     "dev:agent": "npm --workspace @slam/agent run dev",
+    "demo:higher-ed": "tsx scripts/seed-higher-ed-demo.ts",
     "deploy:aws": "./deploy/aws/deploy.sh",
     "test:aws": "./deploy/aws/test.sh",
     "destroy:aws": "./deploy/aws/destroy.sh",
