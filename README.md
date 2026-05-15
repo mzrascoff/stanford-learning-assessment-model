@@ -39,6 +39,16 @@ SLAM is intentionally formative in this version. Reports surface evidence, uncer
    slam-dev-instructor-token
    ```
 
+## Higher-ed assessment demo
+
+For Gates and Anthropic assessment conversations, seed a concrete higher-ed outcomes scenario:
+
+```bash
+npm run demo:higher-ed
+```
+
+This creates `EDUC 240 Outcomes Evidence Memo`, six believable learner sessions, individual student reports, a class report, and JSON/CSV exports. The walkthrough is at [demo/higher-ed-assessment/WALKTHROUGH.md](/Users/mrascoff/Documents/Codex/demo/higher-ed-assessment/WALKTHROUGH.md), and generated exports are under [demo/higher-ed-assessment/exports](/Users/mrascoff/Documents/Codex/demo/higher-ed-assessment/exports).
+
 ## AWS deployment
 
 The repo includes a repeatable single-instance AWS deployment that provisions:

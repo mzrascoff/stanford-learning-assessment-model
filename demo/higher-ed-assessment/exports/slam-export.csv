@@ -1,0 +1,19 @@
+session_id,student_id,student_name,dimension_id,dimension_label,score,confidence
+745ddd01-65f4-49c2-ab09-95363cc3b553,student-001,Avery Patel,outcome-evidence-alignment,"Outcome evidence alignment",4,0.9
+745ddd01-65f4-49c2-ab09-95363cc3b553,student-001,Avery Patel,equity-validity-reasoning,"Equity and validity reasoning",4,0.9
+745ddd01-65f4-49c2-ab09-95363cc3b553,student-001,Avery Patel,metacognitive-calibration,"Metacognitive calibration",4,0.85
+b679d8ee-5b3a-4477-915d-e5c948aa81bd,student-002,Jordan Kim,outcome-evidence-alignment,"Outcome evidence alignment",4,0.9
+b679d8ee-5b3a-4477-915d-e5c948aa81bd,student-002,Jordan Kim,equity-validity-reasoning,"Equity and validity reasoning",4,0.9
+b679d8ee-5b3a-4477-915d-e5c948aa81bd,student-002,Jordan Kim,metacognitive-calibration,"Metacognitive calibration",4,0.85
+b64254cd-1155-4518-abc2-782b1ec838b9,student-003,Maya Rodriguez,outcome-evidence-alignment,"Outcome evidence alignment",4,0.9
+b64254cd-1155-4518-abc2-782b1ec838b9,student-003,Maya Rodriguez,equity-validity-reasoning,"Equity and validity reasoning",4,0.9
+b64254cd-1155-4518-abc2-782b1ec838b9,student-003,Maya Rodriguez,metacognitive-calibration,"Metacognitive calibration",3,0.85
+55018f1b-b544-4661-8d7d-0964b1e2fece,student-004,Samira Lee,outcome-evidence-alignment,"Outcome evidence alignment",3,0.75
+55018f1b-b544-4661-8d7d-0964b1e2fece,student-004,Samira Lee,equity-validity-reasoning,"Equity and validity reasoning",3,0.75
+55018f1b-b544-4661-8d7d-0964b1e2fece,student-004,Samira Lee,metacognitive-calibration,"Metacognitive calibration",3,0.7
+3b4b80ca-96d4-49ac-99e8-6daeb0ac03fd,student-005,Diego Nguyen,outcome-evidence-alignment,"Outcome evidence alignment",4,0.9
+3b4b80ca-96d4-49ac-99e8-6daeb0ac03fd,student-005,Diego Nguyen,equity-validity-reasoning,"Equity and validity reasoning",4,0.9
+3b4b80ca-96d4-49ac-99e8-6daeb0ac03fd,student-005,Diego Nguyen,metacognitive-calibration,"Metacognitive calibration",4,0.85
+5045b0f8-4b48-4d95-9ada-543a41eade74,student-006,Taylor Brooks,outcome-evidence-alignment,"Outcome evidence alignment",1,0.5
+5045b0f8-4b48-4d95-9ada-543a41eade74,student-006,Taylor Brooks,equity-validity-reasoning,"Equity and validity reasoning",1,0.5
+5045b0f8-4b48-4d95-9ada-543a41eade74,student-006,Taylor Brooks,metacognitive-calibration,"Metacognitive calibration",1,0.35
