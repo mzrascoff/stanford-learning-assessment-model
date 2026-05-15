@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLAM Instructor Console</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <main class="layout">
+      <section class="hero panel">
+        <div>
+          <p class="eyebrow">Stanford Learning Assessment Model</p>
+          <h1>SLAM Instructor Console</h1>
+          <p class="lede">
+            Configure cognitive and metacognitive assessments, publish install links, and review formative insight at the
+            individual and class level.
+          </p>
+        </div>
+        <div class="auth-card">
+          <label for="token">Instructor bearer token</label>
+          <input id="token" type="text" />
+          <button id="save-token">Save token</button>
+          <p class="hint">Default local token: <code>slam-dev-instructor-token</code></p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Create assessment</h2>
+          <form id="assessment-form">
+            <label>Title <input name="title" required /></label>
+            <label>Course ID <input name="courseId" value="course-demo" required /></label>
+            <label>Duration (minutes) <input name="durationMinutes" type="number" min="5" max="240" value="20" required /></label>
+            <label>Delivery mode
+              <select name="deliveryMode">
+                <option value="guided">Guided</option>
+                <option value="artifact">Artifact</option>
+                <option value="hybrid" selected>Hybrid</option>
+              </select>
+            </label>
+            <label>Feedback visibility
+              <select name="feedbackVisibility">
+                <option value="instructor_and_student" selected>Instructor and student</option>
+                <option value="instructor_only">Instructor only</option>
+              </select>
+            </label>
+            <label>Description <textarea name="description" rows="3" placeholder="What should this assess?"></textarea></label>
+            <fieldset>
+              <legend>Starter dimensions</legend>
+              <div id="dimension-list" class="chips"></div>
+            </fieldset>
+            <label>Prompt sequence (one prompt per line)
+              <textarea name="promptSequence" rows="5" placeholder="Produce a first-pass response to the assignment.&#10;Explain what you are confident about and what you would revise."></textarea>
+            </label>
+            <label>Artifact types (comma-separated MIME types)
+              <input name="artifactTypes" value="text/plain,text/markdown,application/json" />
+            </label>
+            <button type="submit">Create assessment</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <h2>Assessments</h2>
+            <button id="refresh-assessments">Refresh</button>
+          </div>
+          <div id="assessment-cards" class="stack"></div>
+        </article>
+      </section>
+
+      <section class="grid secondary">
+        <article class="panel">
+          <h2>Artifact-only analysis</h2>
+          <form id="artifact-form">
+            <label>Assessment ID <input name="assessmentId" required /></label>
+            <label>Student ID <input name="studentId" required /></label>
+            <label>Student name <input name="studentName" /></label>
+            <label>Artifact name <input name="name" value="submission.txt" required /></label>
+            <label>MIME type <input name="mimeType" value="text/plain" required /></label>
+            <label>Artifact text
+              <textarea name="content" rows="8" placeholder="Paste a student essay, transcript, or code sample here."></textarea>
+            </label>
+            <button type="submit">Analyze artifact</button>
+          </form>
+          <pre id="artifact-result" class="result"></pre>
+        </article>
+
+        <article class="panel">
+          <h2>Selected report</h2>
+          <pre id="report-output" class="result">Select an assessment or session to inspect reports.</pre>
+        </article>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

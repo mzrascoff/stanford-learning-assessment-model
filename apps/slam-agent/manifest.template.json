@@ -1,0 +1,47 @@
+{
+  "$schema": "../../dist/mcpb-manifest.schema.json",
+  "manifest_version": "0.3",
+  "name": "stanford-learning-assessment-model",
+  "display_name": "SLAM Agent",
+  "version": "0.1.0",
+  "description": "Thin installable MCPB bridge for the Stanford Learning Assessment Model (SLAM).",
+  "long_description": "SLAM adds an instructor-configurable formative assessment layer to AI workflows. This MCPB package installs a local MCP bridge that authenticates a learner, forwards assessment interactions to the SLAM cloud, and returns cited student- and class-level insight.",
+  "author": {
+    "name": "SLAM",
+    "url": "https://slam.local"
+  },
+  "homepage": "https://slam.local",
+  "documentation": "https://slam.local/docs",
+  "support": "https://slam.local/support",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "SLAM_API_BASE_URL": "__SLAM_API_BASE_URL__",
+        "SLAM_INSTALL_TOKEN": "__SLAM_INSTALL_TOKEN__"
+      }
+    }
+  },
+  "tools": [
+    { "name": "start_assessment", "description": "Start a guided SLAM assessment session." },
+    { "name": "next_prompt", "description": "Retrieve the next configured assessment prompt." },
+    { "name": "submit_response", "description": "Submit a student response for the current prompt." },
+    { "name": "record_confidence", "description": "Record a learner confidence rating and rationale." },
+    { "name": "submit_reflection", "description": "Capture metacognitive reflection for the session." },
+    { "name": "upload_artifact", "description": "Attach a document or code artifact for analysis." },
+    { "name": "end_assessment", "description": "End the assessment and trigger formative reporting." }
+  ],
+  "keywords": ["slam", "assessment", "education", "mcp", "mcpb", "formative-learning"],
+  "license": "UNLICENSED",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "privacy_policies": []
+}
