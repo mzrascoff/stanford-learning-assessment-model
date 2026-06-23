@@ -2,8 +2,13 @@
 // into timed, captioned scenes. Served same-origin from /demo/ so all fetches
 // hit the running API with no CORS friction.
 
+import { cannedApi, resetCanned } from "./canned-data.js";
+
 const API = (location.protocol === "file:" ? "http://localhost:4000" : location.origin) + "/api";
 const INSTRUCTOR_TOKEN = new URLSearchParams(location.search).get("token") || "slam-dev-instructor-token";
+// Static hosts (e.g. GitHub Pages) have no SLAM backend, so replay canned
+// responses instead of hitting the API. `?static` forces it anywhere.
+const STATIC = location.hostname.endsWith("github.io") || new URLSearchParams(location.search).has("static");
 const CANCEL = Symbol("cancel");
 
 const $ = (sel) => document.querySelector(sel);
@@ -45,12 +50,23 @@ function wait(ms) {
 }
 
 async function api(path, opts = {}, token) {
-  const res = await fetch(API + path, {
-    ...opts,
-    headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}), ...(opts.headers || {}) }
-  });
-  if (!res.ok) throw new Error(`${path} → ${res.status}: ${(await res.text()).slice(0, 120)}`);
-  return res.json();
+  if (STATIC) {
+    await wait(180); // a touch of latency so the choreography reads naturally
+    return cannedApi(path, opts);
+  }
+  try {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}), ...(opts.headers || {}) }
+    });
+    if (!res.ok) throw new Error(`${path} → ${res.status}: ${(await res.text()).slice(0, 120)}`);
+    return res.json();
+  } catch (error) {
+    // If the live API is unreachable, fall back to canned data so the demo
+    // still plays rather than dead-ending on a network error.
+    if (error === CANCEL) throw error;
+    return cannedApi(path, opts);
+  }
 }
 
 function scene(key) {
@@ -259,7 +275,9 @@ async function sequence() {
 async function play() {
   run = { cancelled: false };
   paused = false; elapsed = 0;
-  el.play.textContent = "⏸ Pause"; el.status.textContent = "Live against the running API.";
+  resetCanned();
+  el.play.textContent = "⏸ Pause";
+  el.status.textContent = STATIC ? "Recorded demo (canned data)." : "Live against the running API.";
   el.bar.style.width = "0%"; el.time.textContent = "0:00";
   try {
     await sequence();

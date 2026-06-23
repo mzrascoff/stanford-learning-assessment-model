@@ -2,9 +2,15 @@
 
 A self-contained, auto-playing walkthrough (~2 min) of the full SLAM workflow —
 **teacher setup → learner session in Claude → cited reports** — rendered as
-timed, captioned scenes. It runs the **real REST flow live** against a running
-API, so every score, evidence quote, and class average on screen is genuinely
-computed, not mocked.
+timed, captioned scenes.
+
+**▶ Watch online:** https://mzrascoff.github.io/stanford-learning-assessment-model/
+
+Served by a running API it makes the **real REST flow live**, so every score,
+evidence quote, and class average is genuinely computed. On a static host (e.g.
+GitHub Pages) it replays the same scenes from **canned data** captured from a
+real run — see [`canned-data.js`](canned-data.js) — so no backend is needed.
+Add `?static` to any URL to force canned mode.
 
 ## What it shows
 

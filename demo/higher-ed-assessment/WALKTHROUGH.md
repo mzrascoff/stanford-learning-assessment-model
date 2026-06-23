@@ -46,20 +46,6 @@ For the class view, highlight:
 - exemplar snippets give instructors concrete evidence to discuss in moderation or advising
 - exports preserve student and class evidence for program assessment without requiring an LMS rebuild
 
-## Why This Fits Gates Conversations
-
-- It centers gateway-course success, equity signals, and actionable instructional follow-up.
-- It separates outcome evidence from course averages, which helps avoid shallow success metrics.
-- It supports program assessment workflows by exporting class and row-level evidence.
-- It treats AI as a way to collect richer formative evidence, not as a replacement for educator judgment.
-
-## Why This Fits Anthropic Conversations
-
-- It demonstrates an MCP-native assessment workflow with scoped student and instructor tools.
-- It keeps assessment grounded in evidence citations, event logs, and versioned reports.
-- It makes uncertainty explicit through confidence, evaluator confidence, and calibration prompts.
-- It offers a concrete pattern for responsible AI learning products: bounded task, transparent signals, human review.
-
 ## Regenerate The Demo
 
 Run:
