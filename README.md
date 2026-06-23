@@ -12,7 +12,7 @@ SLAM is intentionally formative in this version. Reports surface evidence, uncer
 ## Workspace layout
 
 - `packages/slam-core`: shared contracts, file-backed local store, deterministic evaluator, API client, reusable MCP tool registration
-- `apps/api`: instructor console, learner session UI (`/student.html`), auto-playing screencast (`/demo/`), REST API, and dynamic `.mcpb` download endpoint
+- `apps/api`: instructor console, auto-playing screencast (`/demo/`), REST API, and dynamic `.mcpb` download endpoint
 - `apps/mcp-server`: remote MCP server using Streamable HTTP transport
 - `apps/worker`: polling worker for queued session evaluation jobs
 - `apps/slam-agent`: installable stdio MCP bridge packaged as `.mcpb`
@@ -38,8 +38,8 @@ SLAM is intentionally formative in this version. Reports surface evidence, uncer
    ```text
    slam-dev-instructor-token
    ```
-6. Open the learner session UI at [http://localhost:4000/student.html](http://localhost:4000/student.html). Paste an install token — the console's **Publish link** action mints one — or open the published install link directly (it fills the token in automatically).
-7. Watch the end-to-end walkthrough at [http://localhost:4000/demo/](http://localhost:4000/demo/). It auto-plays the full teacher → learner → reports workflow against the live API.
+6. For the learner side, install the SLAM agent into an MCP client such as Claude Desktop. The console's **Publish link** action issues a single-use install link; downloading it yields a tenant-bound `.mcpb` bundle. Once installed, the learner runs the whole session by chatting with Claude — Claude calls SLAM's MCP tools.
+7. Watch the end-to-end walkthrough at [http://localhost:4000/demo/](http://localhost:4000/demo/). It auto-plays the full teacher → learner → reports workflow against the live API, showing the learner side as a Claude chat with inline tool calls.
 
 > The worker and MCP server are optional for the console/learner flow: the API generates reports synchronously by default (`SLAM_SYNC_EVALUATION=true`), so `npm run dev:api` alone is enough to try it.
 
@@ -55,7 +55,7 @@ This creates `EDUC 240 Outcomes Evidence Memo`, six believable learner sessions,
 
 ## Screencast walkthrough
 
-With the API running, an auto-playing ~2-minute walkthrough of the full teacher → learner → reports workflow is served same-origin at [http://localhost:4000/demo/](http://localhost:4000/demo/). It makes the real API calls live, so every score and citation on screen is genuinely computed.
+With the API running, an auto-playing ~2-minute walkthrough of the full teacher → learner → reports workflow is served same-origin at [http://localhost:4000/demo/](http://localhost:4000/demo/). It makes the real API calls live, so every score and citation on screen is genuinely computed. The learner side is shown as a Claude chat with inline MCP tool-use cards — the way students actually use SLAM.
 
 Render it to a video file headlessly — no display or manual screen capture:
 
@@ -101,7 +101,7 @@ Notes:
 
 ### Student workflows
 
-Learners have two entry points that drive the same flow: the installable `.mcpb` MCP agent (for AI clients such as Claude Desktop) and a browser session UI at `/student.html`.
+Learners work inside an AI client such as Claude Desktop, where the installed `.mcpb` MCP agent exposes SLAM's tools. The learner simply chats; Claude calls the tools to drive the flow:
 
 - exchange a one-time install token for a scoped access token on first launch
 - start timed guided assessments

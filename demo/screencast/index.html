@@ -119,17 +119,29 @@
       @keyframes pop { from { opacity: 0; transform: scale(0.97); } }
       .install-link { font-size: 0.78rem; color: var(--accent-dark); overflow-wrap: anywhere; }
 
-      /* student chat */
-      .chat { display: grid; gap: 0.55rem; align-content: start; height: 100%; overflow: auto; padding-right: 0.3rem; }
-      .bubble { max-width: 82%; padding: 0.7rem 0.9rem; border-radius: 16px; line-height: 1.4; font-size: 0.9rem; animation: pop 320ms ease both; }
-      .bubble .who { display: block; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65; margin-bottom: 0.25rem; }
-      .bubble.assistant { justify-self: start; background: var(--panel-strong); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
-      .bubble.guidance { justify-self: start; font-size: 0.82rem; color: var(--muted); background: rgba(47,114,94,0.06); border: 1px dashed rgba(47,114,94,0.25); }
-      .bubble.learner { justify-self: end; background: linear-gradient(135deg, var(--accent), #d07d43); color: #fff9f0; border-bottom-right-radius: 5px; }
-      .metachip { justify-self: start; font-size: 0.78rem; color: var(--muted); background: rgba(29,45,42,0.06); border-radius: 999px; padding: 0.2rem 0.6rem; }
-      .dots { display: inline-flex; gap: 0.3rem; vertical-align: middle; }
-      .dots i { width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 1px solid rgba(29,45,42,0.2); display: grid; place-items: center; font-size: 0.75rem; font-style: normal; background: #fff; }
-      .dots i.on { background: linear-gradient(135deg, var(--accent), #d07d43); color: #fff9f0; border-color: transparent; }
+      /* student side = a Claude chat with the SLAM MCP agent connected */
+      .claude-app { display: grid; grid-template-columns: 220px 1fr; gap: 0; height: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #fbf9f5; box-shadow: var(--shadow); }
+      .claude-side { background: #f3efe7; border-right: 1px solid var(--line); padding: 1rem; display: grid; gap: 0.8rem; align-content: start; }
+      .claude-logo { font-family: "Iowan Old Style", Georgia, serif; font-size: 1.25rem; display: flex; align-items: center; gap: 0.4rem; }
+      .claude-logo .spark { color: #d97757; }
+      .claude-conn { font-size: 0.82rem; display: grid; gap: 0.15rem; padding: 0.55rem 0.7rem; border-radius: 12px; background: rgba(47,114,94,0.08); border: 1px solid rgba(47,114,94,0.18); }
+      .claude-conn .dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #2f725e; margin-right: 0.3rem; }
+      .claude-conn .meta { font-size: 0.72rem; color: var(--muted); }
+      .side-note { font-size: 0.78rem; line-height: 1.4; }
+      .claude-thread { height: 100%; overflow: auto; padding: 1.1rem 1.3rem; display: grid; gap: 0.85rem; align-content: start; }
+      .cmsg { max-width: 92%; line-height: 1.5; font-size: 0.9rem; animation: pop 300ms ease both; white-space: pre-wrap; }
+      .cmsg.user { justify-self: end; background: #efe9df; border: 1px solid var(--line); border-radius: 14px; padding: 0.6rem 0.85rem; }
+      .cmsg.assistant { justify-self: start; display: grid; grid-template-columns: 1.4rem 1fr; gap: 0.5rem; color: var(--ink); }
+      .cmsg.assistant .av { color: #d97757; font-size: 1rem; line-height: 1.4; }
+      .tool-card { justify-self: start; width: 92%; border: 1px solid var(--line); border-radius: 12px; background: #fff; padding: 0.5rem 0.7rem; font-size: 0.82rem; animation: pop 300ms ease both; }
+      .tool-card .thead { display: flex; align-items: center; gap: 0.45rem; }
+      .tool-card .ticon { color: #d97757; }
+      .tool-card .tname { font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; }
+      .tool-card .tstatus { margin-left: auto; font-size: 0.74rem; color: var(--muted); }
+      .tool-card .tstatus.ok { color: #2f725e; }
+      .tool-card .tres { margin-top: 0.35rem; font-family: ui-monospace, Menlo, monospace; font-size: 0.74rem; color: var(--muted); white-space: pre-wrap; }
+      .spin { display: inline-block; animation: spin 0.9s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
 
       .dimension { border: 1px solid var(--line); border-radius: 14px; padding: 0.7rem 0.9rem; background: rgba(255,255,255,0.72); margin-bottom: 0.5rem; }
       .dimension .score { float: right; font-family: "Iowan Old Style", Georgia, serif; font-size: 1.2rem; color: var(--accent-dark); }
@@ -201,14 +213,17 @@
         </section>
 
         <section class="scene" data-scene="student">
-          <div class="cols">
-            <div class="card" style="overflow:hidden; display:grid; grid-template-rows:auto 1fr;">
-              <h2>Learner session</h2>
-              <div class="chat" id="chat"></div>
-            </div>
-            <div class="card">
-              <h2>What's happening</h2>
-              <div id="student-side"></div>
+          <div class="claude-app">
+            <aside class="claude-side">
+              <div class="claude-logo"><span class="spark">✳</span> Claude</div>
+              <div class="claude-conn">
+                <span class="dot"></span> SLAM Assessment
+                <span class="meta">MCP · connected</span>
+              </div>
+              <p class="meta side-note">The learner installed the SLAM <code>.mcpb</code> agent. Claude can now call its assessment tools.</p>
+            </aside>
+            <div class="claude-main">
+              <div class="claude-thread" id="thread"></div>
             </div>
           </div>
         </section>
@@ -230,7 +245,7 @@
           <div class="titlecard">
             <p class="eyebrow">Evidence, not grades</p>
             <h1>Cited evidence · confidence · next steps</h1>
-            <p>Instructor console at <b>/</b> · learner session at <b>/student.html</b> · MCP tools for AI clients.</p>
+            <p>Instructor console at <b>/</b> · learners work inside <b>Claude</b> via the SLAM MCP agent.</p>
           </div>
         </section>
       </div>
@@ -243,7 +258,7 @@
           <button id="btn-restart">↻ Restart</button>
           <button id="btn-play">⏸ Pause</button>
           <span class="status" id="status"></span>
-          <span class="time" id="time">0:00 / 3:30</span>
+          <span class="time" id="time">0:00</span>
         </div>
       </div>
     </div>
