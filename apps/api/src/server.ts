@@ -90,8 +90,20 @@ function requireInstructor(request: express.Request): ActorContext {
 async function buildBundle(installToken: string) {
   const manifestPath = resolve(__dirname, "../../slam-agent/manifest.template.json");
   const serverEntryPath = resolve(__dirname, "../../slam-agent/dist/server/index.js");
-  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
-  const serverEntry = await readFile(serverEntryPath, "utf8");
+  let manifest: Record<string, unknown>;
+  let serverEntry: string;
+  try {
+    manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
+    serverEntry = await readFile(serverEntryPath, "utf8");
+  } catch (cause) {
+    if ((cause as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new SlamError(
+        "internal",
+        "SLAM agent bundle is not built. Run `npm run build` (or `npm --workspace @slam/agent run build`) before serving downloads."
+      );
+    }
+    throw cause;
+  }
 
   const server = manifest.server as {
     type: string;

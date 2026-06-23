@@ -1,10 +1,11 @@
-export type SlamErrorKind = "validation" | "unauthorized" | "forbidden" | "not_found";
+export type SlamErrorKind = "validation" | "unauthorized" | "forbidden" | "not_found" | "internal";
 
 const STATUS_BY_KIND: Record<SlamErrorKind, number> = {
   validation: 400,
   unauthorized: 401,
   forbidden: 403,
-  not_found: 404
+  not_found: 404,
+  internal: 500
 };
 
 /**

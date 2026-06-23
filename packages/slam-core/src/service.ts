@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type {
   AccessToken,
   ActorContext,
@@ -47,6 +47,15 @@ function makeOpaqueToken(prefix: string): string {
   return `${prefix}_${randomBytes(18).toString("base64url")}`;
 }
 
+// Compare two secrets without leaking their relationship through timing. Both
+// sides are hashed to a fixed length first so timingSafeEqual never sees
+// unequal-length buffers (which would itself reveal length).
+function safeEquals(a: string, b: string): boolean {
+  const digestA = createHash("sha256").update(a).digest();
+  const digestB = createHash("sha256").update(b).digest();
+  return timingSafeEqual(digestA, digestB);
+}
+
 // RFC 4180 quoting plus spreadsheet formula-injection guarding. Every field is
 // quoted so embedded commas/quotes/newlines can't shift columns, and cells that
 // would be interpreted as a formula are prefixed with a single quote.
@@ -62,6 +71,13 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new SlamError("validation", message);
   }
+}
+
+function requireText(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new SlamError("validation", `${field} is required.`);
+  }
+  return value;
 }
 
 function normalizeAssessmentInput(input: CreateAssessmentInput): CreateAssessmentInput {
@@ -173,7 +189,7 @@ export class SlamService {
     }
 
     const state = await this.store.read();
-    const token = state.accessTokens.find((entry) => entry.token === accessToken);
+    const token = state.accessTokens.find((entry) => safeEquals(entry.token, accessToken));
     if (!token || new Date(token.expiresAt).getTime() < Date.now()) {
       return null;
     }
@@ -273,7 +289,7 @@ export class SlamService {
 
   async exchangeInstallToken(input: DeviceExchangeInput): Promise<DeviceExchangeResult> {
     return this.store.transaction((state) => {
-      const installToken = state.installTokens.find((entry) => entry.token === input.installToken);
+      const installToken = state.installTokens.find((entry) => safeEquals(entry.token, input.installToken));
       assert(installToken, "Install token was not found.");
       assert(new Date(installToken.expiresAt).getTime() > Date.now(), "Install token has expired.");
       assert(!installToken.usedAt, "Install token has already been exchanged.");
@@ -406,6 +422,8 @@ export class SlamService {
 
   async submitResponse(input: SubmitResponseInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.promptId, "promptId");
+    requireText(input.content, "content");
 
     return this.store.transaction((state) => {
       const session = selectSession(state, input.sessionId);
@@ -452,6 +470,7 @@ export class SlamService {
 
   async submitReflection(input: SubmitReflectionInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.content, "content");
 
     return this.store.transaction((state) => {
       const session = selectSession(state, input.sessionId);
@@ -474,6 +493,9 @@ export class SlamService {
 
   async uploadArtifact(input: UploadArtifactInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.name, "name");
+    requireText(input.mimeType, "mimeType");
+    requireText(input.contentBase64, "contentBase64");
 
     return this.store.transaction(async (state) => {
       const session = selectSession(state, input.sessionId);

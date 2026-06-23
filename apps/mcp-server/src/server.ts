@@ -66,14 +66,19 @@ app.all("/mcp", async (request, response) => {
         }
       });
 
-      (sessionTransport as StreamableHTTPServerTransport & { onclose?: () => void; sessionId?: string }).onclose = () => {
-        const trackedSessionId = (sessionTransport as StreamableHTTPServerTransport & { sessionId?: string }).sessionId;
-        if (trackedSessionId) {
-          transports.delete(trackedSessionId);
+      // connect() installs the SDK's own onclose handler, so wrap it afterwards
+      // (chaining the existing one) to ensure the session is always evicted from
+      // the map when the transport closes — otherwise it leaks for the life of
+      // the process.
+      await server.connect(sessionTransport);
+      const sdkOnClose = sessionTransport.onclose;
+      sessionTransport.onclose = () => {
+        sdkOnClose?.();
+        if (sessionTransport.sessionId) {
+          transports.delete(sessionTransport.sessionId);
         }
       };
 
-      await server.connect(sessionTransport);
       transport = sessionTransport;
     }
 

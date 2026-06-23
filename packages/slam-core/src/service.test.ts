@@ -93,6 +93,43 @@ test("publishes install link and generates reports for a completed session", asy
   await rm(dataDir, { recursive: true, force: true });
 });
 
+test("rejects empty required fields and unknown access tokens", async () => {
+  const { dataDir, service, instructor } = await createService();
+  const dimensions = getAllStarterDimensions().slice(0, 1);
+  const assessment = await service.createAssessment(
+    {
+      courseId: "course-demo",
+      title: "Validation check",
+      durationMinutes: 20,
+      deliveryMode: "guided",
+      feedbackVisibility: "instructor_and_student",
+      rubricDimensions: dimensions,
+      anchorExamples: buildStarterAnchors(dimensions),
+      promptSequence: buildStarterPrompts(dimensions),
+      artifactTypes: ["text/plain"]
+    },
+    instructor
+  );
+
+  const published = await service.publishInstallLink({ assessmentId: assessment.id }, instructor);
+  const exchanged = await service.exchangeInstallToken({ installToken: published.installToken.token });
+  const student = await service.authenticate(exchanged.accessToken);
+  assert(student);
+  const session = await service.startAssessment({}, student);
+  const next = await service.nextPrompt(session.id, student);
+  assert(next.prompt);
+
+  await assert.rejects(
+    () => service.submitResponse({ sessionId: session.id, promptId: next.prompt!.id, content: "   " }, student),
+    /content is required/
+  );
+
+  // An unknown / tampered token authenticates to null rather than matching.
+  assert.equal(await service.authenticate("slam_access_not-a-real-token"), null);
+
+  await rm(dataDir, { recursive: true, force: true });
+});
+
 test("CSV export quotes fields and neutralizes formula injection", async () => {
   const { dataDir, service, instructor } = await createService();
   const dimensions = getAllStarterDimensions().slice(0, 1);
