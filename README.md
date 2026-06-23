@@ -12,7 +12,7 @@ SLAM is intentionally formative in this version. Reports surface evidence, uncer
 ## Workspace layout
 
 - `packages/slam-core`: shared contracts, file-backed local store, deterministic evaluator, API client, reusable MCP tool registration
-- `apps/api`: instructor-facing web/API service and dynamic `.mcpb` download endpoint
+- `apps/api`: instructor console, learner session UI (`/student.html`), auto-playing screencast (`/demo/`), REST API, and dynamic `.mcpb` download endpoint
 - `apps/mcp-server`: remote MCP server using Streamable HTTP transport
 - `apps/worker`: polling worker for queued session evaluation jobs
 - `apps/slam-agent`: installable stdio MCP bridge packaged as `.mcpb`
@@ -38,6 +38,10 @@ SLAM is intentionally formative in this version. Reports surface evidence, uncer
    ```text
    slam-dev-instructor-token
    ```
+6. Open the learner session UI at [http://localhost:4000/student.html](http://localhost:4000/student.html). Paste an install token — the console's **Publish link** action mints one — or open the published install link directly (it fills the token in automatically).
+7. Watch the end-to-end walkthrough at [http://localhost:4000/demo/](http://localhost:4000/demo/). It auto-plays the full teacher → learner → reports workflow against the live API.
+
+> The worker and MCP server are optional for the console/learner flow: the API generates reports synchronously by default (`SLAM_SYNC_EVALUATION=true`), so `npm run dev:api` alone is enough to try it.
 
 ## Higher-ed assessment demo
 
@@ -47,7 +51,20 @@ For Gates and Anthropic assessment conversations, seed a concrete higher-ed outc
 npm run demo:higher-ed
 ```
 
-This creates `EDUC 240 Outcomes Evidence Memo`, six believable learner sessions, individual student reports, a class report, and JSON/CSV exports. The walkthrough is at [demo/higher-ed-assessment/WALKTHROUGH.md](/Users/mrascoff/Documents/Codex/demo/higher-ed-assessment/WALKTHROUGH.md), and generated exports are under [demo/higher-ed-assessment/exports](/Users/mrascoff/Documents/Codex/demo/higher-ed-assessment/exports).
+This creates `EDUC 240 Outcomes Evidence Memo`, six believable learner sessions, individual student reports, a class report, and JSON/CSV exports. The walkthrough is at [demo/higher-ed-assessment/WALKTHROUGH.md](demo/higher-ed-assessment/WALKTHROUGH.md), and generated exports are under [demo/higher-ed-assessment/exports](demo/higher-ed-assessment/exports).
+
+## Screencast walkthrough
+
+With the API running, an auto-playing ~2-minute walkthrough of the full teacher → learner → reports workflow is served same-origin at [http://localhost:4000/demo/](http://localhost:4000/demo/). It makes the real API calls live, so every score and citation on screen is genuinely computed.
+
+Render it to a video file headlessly — no display or manual screen capture:
+
+```bash
+npx playwright install chromium   # first time only
+npm run demo:record               # writes demo/screencast/slam-demo.webm
+```
+
+See [demo/screencast/README.md](demo/screencast/README.md) for details.
 
 ## AWS deployment
 
@@ -70,7 +87,7 @@ npm run destroy:aws
 Notes:
 
 - the deploy script targets the configured AWS CLI region and defaults to `us-west-2`
-- the CloudFormation template is at [deploy/aws/slam-ec2.yaml](/Users/mrascoff/Documents/Codex/deploy/aws/slam-ec2.yaml)
+- the CloudFormation template is at [deploy/aws/slam-ec2.yaml](deploy/aws/slam-ec2.yaml)
 - the EC2 bootstrap installs Node 22 so the AWS SDK runtime matches the app's S3 artifact-store dependency requirements
 
 ## What is implemented
@@ -83,6 +100,8 @@ Notes:
 - submit artifact-only analyses through the web app or API
 
 ### Student workflows
+
+Learners have two entry points that drive the same flow: the installable `.mcpb` MCP agent (for AI clients such as Claude Desktop) and a browser session UI at `/student.html`.
 
 - exchange a one-time install token for a scoped access token on first launch
 - start timed guided assessments
@@ -103,9 +122,11 @@ Base URL: `http://localhost:4000/api`
 Key endpoints:
 
 - `GET /health`
+- `GET /me`
 - `GET /starter-dimensions`
 - `POST /assessments`
 - `POST /assessments/:assessmentId/publish`
+- `POST /artifacts/analyze`
 - `POST /device-links/exchange`
 - `POST /sessions`
 - `POST /sessions/:sessionId/next-prompt`
@@ -123,6 +144,8 @@ Key endpoints:
 The `.mcpb` download endpoint is:
 
 - `GET /downloads/slam-agent.mcpb?installToken=...`
+
+Errors return standard HTTP status codes — `400` validation, `401` unauthenticated, `403` forbidden, `404` not found — rather than a single catch-all status.
 
 ## MCP interfaces
 
@@ -153,7 +176,7 @@ The `.mcpb` download endpoint is:
 
 ## MCPB package
 
-The bridge package lives at [apps/slam-agent/manifest.template.json](/Users/mrascoff/Documents/Codex/apps/slam-agent/manifest.template.json) and is built into [apps/slam-agent/dist/slam-agent.mcpb](/Users/mrascoff/Documents/Codex/apps/slam-agent/dist/slam-agent.mcpb).
+The bridge package lives at [apps/slam-agent/manifest.template.json](apps/slam-agent/manifest.template.json) and is built into [apps/slam-agent/dist/slam-agent.mcpb](apps/slam-agent/dist/slam-agent.mcpb).
 
 This implementation follows the current MCPB naming and packaging model. If you still think of this as DXT, treat MCPB as the renamed successor format.
 
@@ -165,11 +188,11 @@ Executed locally:
 - `npm run build`
 - `npm test`
 
-Current automated coverage is a core service integration test that exercises assessment creation, install-link publishing, token exchange, guided session submission, and report generation. The cloud services and MCP transports compile successfully, and the `.mcpb` bundle is produced during build.
+Core `node --test` coverage exercises the full guided-session flow (assessment creation, install-link publishing, token exchange, submission, report generation), CSV-export escaping, required-field/auth validation, and cross-process store locking. `scripts/mcp-e2e.sh` additionally boots the API + remote MCP server and drives them with a real MCP client. The cloud services and MCP transports compile successfully, and the `.mcpb` bundle is produced during build.
 
 ## Notes on production hardening
 
-The current implementation still uses a file-backed metadata store and local queue, but student artifact blobs can now be externalized to S3 through the built-in artifact-store abstraction. The remaining service boundaries map cleanly to the intended production replacements:
+The current implementation still uses a file-backed metadata store and local queue — now guarded by a cross-process lock so the API, worker, and MCP server can share it safely — but student artifact blobs can now be externalized to S3 through the built-in artifact-store abstraction. The remaining service boundaries map cleanly to the intended production replacements:
 
 - Postgres for assessment/session/report data
 - S3-compatible storage for artifacts and transcripts
