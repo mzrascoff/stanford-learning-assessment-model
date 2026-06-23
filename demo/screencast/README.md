@@ -43,10 +43,19 @@ fresh assessment, so you can replay cleanly.
 
 ## Recording to a video file
 
-The walkthrough is paced for a clean screen recording:
+The repo ships a headless recorder — no display or manual screen capture
+needed. It boots the API against a throwaway data dir, records the full
+play-through, and tears everything down:
 
-- **macOS:** `Cmd-Shift-5` → record the browser window. Trim to the run.
-- **Headless / CI:** drive `http://localhost:4000/demo/` with Playwright's
-  `recordVideo` context option to capture a `.webm` without a display.
+```bash
+npm run build
+npx playwright install chromium   # first time only
+npm run demo:record               # writes demo/screencast/slam-demo.webm
+# or choose a path:  node demo/screencast/record.mjs /tmp/slam-demo.webm
+```
 
-Target length is ~3:30, comfortably under 4 minutes.
+Output is a 1280×800 VP8 `.webm`, ~2:15 long (well under 4 minutes). Generated
+videos are git-ignored. To transcode to MP4: `ffmpeg -i slam-demo.webm slam-demo.mp4`.
+
+Prefer to capture by hand? The walkthrough is paced for it — on macOS,
+`Cmd-Shift-5` and record the browser window.

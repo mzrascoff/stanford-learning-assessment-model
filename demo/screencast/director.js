@@ -4,7 +4,6 @@
 
 const API = (location.protocol === "file:" ? "http://localhost:4000" : location.origin) + "/api";
 const INSTRUCTOR_TOKEN = new URLSearchParams(location.search).get("token") || "slam-dev-instructor-token";
-const TOTAL_MS = 210000; // 3:30 target
 const CANCEL = Symbol("cancel");
 
 const $ = (sel) => document.querySelector(sel);
@@ -20,14 +19,19 @@ let elapsed = 0;
 
 setInterval(() => {
   if (!run || run.cancelled || paused) return;
-  elapsed = Math.min(elapsed + 200, TOTAL_MS);
-  el.bar.style.width = `${(elapsed / TOTAL_MS) * 100}%`;
-  el.time.textContent = `${fmt(elapsed)} / 3:30`;
+  elapsed += 200;
+  el.time.textContent = fmt(elapsed);
 }, 200);
 
 function fmt(ms) {
   const s = Math.round(ms / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+// Progress tracks scene completion, so the bar is honest regardless of how
+// fast the live API responds.
+function setProgress(fraction) {
+  el.bar.style.width = `${Math.round(fraction * 100)}%`;
 }
 
 function wait(ms) {
@@ -87,12 +91,12 @@ function chip(host, text, cls = "metachip") {
 // ---- the choreographed run ----
 async function sequence() {
   // Scene 1 — title
-  scene("title"); setUrl("localhost:4000");
+  scene("title"); setUrl("localhost:4000"); setProgress(0.02);
   say("Intro", "SLAM turns an AI-enabled learning task into formative, evidence-based assessment — no grades.");
   await wait(6500);
 
   // Scene 2 — teacher: create
-  scene("teacher-create"); setUrl("localhost:4000  ·  Instructor console");
+  scene("teacher-create"); setUrl("localhost:4000  ·  Instructor console"); setProgress(0.16);
   say("Teacher · Setup", "An instructor signs in and defines an outcome-aligned assessment.");
   const dims = await api("/starter-dimensions", { method: "GET" });
   const picked = [dims.find((d) => d.category === "cognitive"), dims.find((d) => d.category === "metacognitive")].filter(Boolean);
@@ -119,7 +123,7 @@ async function sequence() {
   await wait(2600);
 
   // Scene 3 — teacher: publish
-  scene("teacher-publish"); setUrl("localhost:4000  ·  Instructor console");
+  scene("teacher-publish"); setUrl("localhost:4000  ·  Instructor console"); setProgress(0.34);
   $("#publish-list").innerHTML =
     `<div class="asset"><h3>${assessment.title}</h3><p class="meta">${assessment.deliveryMode} · ${assessment.durationMinutes} min</p>` +
     `<div style="margin-top:.5rem"><button class="btn" id="pub-btn">Publish link</button></div></div>`;
@@ -138,7 +142,7 @@ async function sequence() {
   await wait(3200);
 
   // Scene 4 — student session
-  scene("student"); setUrl("localhost:4000/student.html  ·  Learner");
+  scene("student"); setUrl("localhost:4000/student.html  ·  Learner"); setProgress(0.50);
   say("Learner · Session", "The learner opens the link — it exchanges the install token for a scoped session.");
   const chat = $("#chat"); const side = $("#student-side"); chat.innerHTML = ""; side.innerHTML = "";
   const toolLog = (name) => chip(side, `▸ ${name}  ✓`, "chip");
@@ -189,7 +193,7 @@ async function sequence() {
   }
 
   // Scene 5 — submit + reports
-  scene("reports"); setUrl("localhost:4000  ·  Reports");
+  scene("reports"); setUrl("localhost:4000  ·  Reports"); setProgress(0.80);
   say("Insight · Report", "Submitting runs the evaluator: scores with cited evidence, confidence, and next steps.");
   session = await api(`/sessions/${session.id}/complete`, { method: "POST" }, ST);
   const report = await api(`/reports/student/${session.id}`, { method: "GET" }, ST);
@@ -224,9 +228,8 @@ async function sequence() {
   await wait(2600);
 
   // Scene 6 — outro
-  scene("outro"); setUrl("localhost:4000");
+  scene("outro"); setUrl("localhost:4000"); setProgress(1);
   say("Wrap", "Setup → guided session → cited reports. Teacher console, learner session, and MCP — one workflow.");
-  elapsed = TOTAL_MS; el.bar.style.width = "100%"; el.time.textContent = "3:30 / 3:30";
   await wait(6000);
   el.status.textContent = "Demo complete — press ↻ Restart to replay.";
 }
@@ -235,7 +238,7 @@ async function play() {
   run = { cancelled: false };
   paused = false; elapsed = 0;
   el.play.textContent = "⏸ Pause"; el.status.textContent = "Live against the running API.";
-  el.bar.style.width = "0%"; el.time.textContent = "0:00 / 3:30";
+  el.bar.style.width = "0%"; el.time.textContent = "0:00";
   try {
     await sequence();
   } catch (e) {
