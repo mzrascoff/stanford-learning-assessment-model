@@ -297,6 +297,9 @@ app.get("/downloads/slam-agent.mcpb", async (request, response) => {
 
 const publicDir = resolve(__dirname, "../public");
 app.use(express.static(publicDir));
+// Self-contained auto-playing demo walkthrough, served same-origin so it can
+// drive the real REST flow without CORS friction. Available at /demo/.
+app.use("/demo", express.static(resolve(__dirname, "../../../demo/screencast")));
 app.get("/", (_request, response) => {
   response.sendFile(resolve(publicDir, "index.html"));
 });

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLAM — Screencast Demo</title>
+    <style>
+      :root {
+        --bg: #f4efe3;
+        --panel: rgba(255, 251, 244, 0.92);
+        --panel-strong: rgba(255, 249, 238, 0.98);
+        --ink: #1d2d2a;
+        --muted: #566660;
+        --accent: #bf5a2b;
+        --accent-dark: #7c3415;
+        --green: #2f725e;
+        --line: rgba(29, 45, 42, 0.12);
+        --shadow: 0 18px 40px rgba(80, 52, 29, 0.16);
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(191, 90, 43, 0.16), transparent 30%),
+          radial-gradient(circle at top right, rgba(47, 114, 94, 0.16), transparent 26%),
+          linear-gradient(180deg, #f8f1e5 0%, #e9dcc6 100%);
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 1.2rem;
+      }
+      h1, h2, h3, legend { font-family: "Iowan Old Style", Georgia, serif; margin: 0; }
+      .frame {
+        width: min(1180px, 100%);
+        aspect-ratio: 16 / 10;
+        background: var(--bg);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        position: relative;
+        border: 1px solid var(--line);
+      }
+      .chrome {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.6rem 0.9rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-bottom: 1px solid var(--line);
+      }
+      .lights { display: flex; gap: 0.4rem; }
+      .lights i { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: block; }
+      .lights i:nth-child(1) { background: #e0654f; }
+      .lights i:nth-child(2) { background: #e6b34a; }
+      .lights i:nth-child(3) { background: #5fb07e; }
+      .url {
+        flex: 1;
+        font-size: 0.82rem;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.32rem 0.8rem;
+      }
+      .rec { display: flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: var(--accent-dark); letter-spacing: 0.1em; }
+      .rec b { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--accent); animation: blink 1.1s infinite; }
+      @keyframes blink { 50% { opacity: 0.25; } }
+
+      .stage { position: relative; overflow: hidden; }
+      .scene {
+        position: absolute; inset: 0;
+        padding: 1.4rem 1.6rem;
+        opacity: 0; transform: translateY(14px);
+        transition: opacity 480ms ease, transform 480ms ease;
+        pointer-events: none;
+        overflow: auto;
+      }
+      .scene.active { opacity: 1; transform: none; }
+
+      .eyebrow { text-transform: uppercase; letter-spacing: 0.24em; font-size: 0.74rem; color: var(--accent-dark); margin: 0 0 0.5rem; }
+      .titlecard { display: grid; place-content: center; text-align: center; gap: 0.6rem; height: 100%; }
+      .titlecard h1 { font-size: clamp(2.4rem, 5vw, 4rem); line-height: 0.96; }
+      .titlecard p { color: var(--muted); max-width: 38ch; margin: 0 auto; }
+
+      .cols { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1rem; height: 100%; }
+      .card {
+        background: var(--panel); border: 1px solid var(--line);
+        border-radius: 18px; padding: 1rem 1.1rem; box-shadow: var(--shadow);
+      }
+      .card h2 { font-size: 1.15rem; margin-bottom: 0.6rem; }
+      .field { display: grid; gap: 0.25rem; margin-bottom: 0.55rem; font-size: 0.86rem; }
+      .field .box {
+        border: 1px solid rgba(29,45,42,0.16); border-radius: 12px;
+        background: rgba(255,255,255,0.9); padding: 0.5rem 0.7rem; min-height: 2.1rem;
+      }
+      .field .box.area { min-height: 4rem; white-space: pre-wrap; }
+      .btn {
+        display: inline-block; border-radius: 999px; padding: 0.55rem 1rem; border: 0;
+        background: linear-gradient(135deg, var(--accent), #d07d43); color: #fff9f0;
+        box-shadow: 0 8px 16px rgba(191,90,43,0.26); font: inherit; font-size: 0.86rem;
+      }
+      .btn.ghost { background: rgba(29,45,42,0.08); color: var(--ink); box-shadow: none; }
+      .btn.pressed { transform: translateY(1px); filter: brightness(0.95); }
+      .chip {
+        display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 999px;
+        padding: 0.35rem 0.7rem; background: rgba(47,114,94,0.1);
+        border: 1px solid rgba(47,114,94,0.2); font-size: 0.8rem; color: var(--green); margin: 0.2rem 0.2rem 0 0;
+      }
+      .asset {
+        border: 1px solid var(--line); border-radius: 14px; padding: 0.7rem 0.85rem;
+        background: rgba(255,255,255,0.75); margin-top: 0.6rem; animation: pop 360ms ease both;
+      }
+      .asset h3 { font-size: 1rem; }
+      .asset .meta { color: var(--muted); font-size: 0.8rem; }
+      @keyframes pop { from { opacity: 0; transform: scale(0.97); } }
+      .install-link { font-size: 0.78rem; color: var(--accent-dark); overflow-wrap: anywhere; }
+
+      /* student chat */
+      .chat { display: grid; gap: 0.55rem; align-content: start; height: 100%; overflow: auto; padding-right: 0.3rem; }
+      .bubble { max-width: 82%; padding: 0.7rem 0.9rem; border-radius: 16px; line-height: 1.4; font-size: 0.9rem; animation: pop 320ms ease both; }
+      .bubble .who { display: block; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65; margin-bottom: 0.25rem; }
+      .bubble.assistant { justify-self: start; background: var(--panel-strong); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+      .bubble.guidance { justify-self: start; font-size: 0.82rem; color: var(--muted); background: rgba(47,114,94,0.06); border: 1px dashed rgba(47,114,94,0.25); }
+      .bubble.learner { justify-self: end; background: linear-gradient(135deg, var(--accent), #d07d43); color: #fff9f0; border-bottom-right-radius: 5px; }
+      .metachip { justify-self: start; font-size: 0.78rem; color: var(--muted); background: rgba(29,45,42,0.06); border-radius: 999px; padding: 0.2rem 0.6rem; }
+      .dots { display: inline-flex; gap: 0.3rem; vertical-align: middle; }
+      .dots i { width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 1px solid rgba(29,45,42,0.2); display: grid; place-items: center; font-size: 0.75rem; font-style: normal; background: #fff; }
+      .dots i.on { background: linear-gradient(135deg, var(--accent), #d07d43); color: #fff9f0; border-color: transparent; }
+
+      .dimension { border: 1px solid var(--line); border-radius: 14px; padding: 0.7rem 0.9rem; background: rgba(255,255,255,0.72); margin-bottom: 0.5rem; }
+      .dimension .score { float: right; font-family: "Iowan Old Style", Georgia, serif; font-size: 1.2rem; color: var(--accent-dark); }
+      .evidence { font-size: 0.8rem; font-style: italic; color: var(--muted); border-left: 3px solid rgba(191,90,43,0.4); padding-left: 0.5rem; margin-top: 0.4rem; }
+      .csv { font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; background: rgba(16,32,28,0.92); color: #dcefe7; border-radius: 12px; padding: 0.7rem; white-space: pre; overflow: auto; }
+      .cursor::after { content: "▋"; color: var(--accent); animation: blink 1s steps(1) infinite; }
+
+      /* lower third + controls */
+      .lowerthird {
+        background: rgba(16, 32, 28, 0.92); color: #f3ece0;
+        padding: 0.7rem 1.1rem; display: grid; gap: 0.5rem;
+      }
+      .caption { font-size: 0.98rem; min-height: 1.4em; }
+      .scene-tag { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: #e7b78f; }
+      .bar { height: 5px; border-radius: 999px; background: rgba(255,255,255,0.18); overflow: hidden; }
+      .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #e7b78f); transition: width 240ms linear; }
+      .controls { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; }
+      .controls button { background: rgba(255,255,255,0.14); color: #f3ece0; border: 0; border-radius: 999px; padding: 0.35rem 0.8rem; font: inherit; font-size: 0.8rem; cursor: pointer; }
+      .controls .time { margin-left: auto; font-variant-numeric: tabular-nums; opacity: 0.85; }
+      .status { font-size: 0.74rem; opacity: 0.75; }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="chrome">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="url" id="url">localhost:4000</div>
+        <div class="rec"><b></b> REC</div>
+      </div>
+
+      <div class="stage" id="stage">
+        <section class="scene" data-scene="title">
+          <div class="titlecard">
+            <p class="eyebrow">Stanford Learning Assessment Model</p>
+            <h1>Formative assessment,<br />from setup to insight</h1>
+            <p>A 3-minute walkthrough of the instructor console and the learner session — running against the live API.</p>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="teacher-create">
+          <div class="cols">
+            <div class="card">
+              <h2>Create assessment</h2>
+              <div class="field"><span>Title</span><div class="box" id="f-title"></div></div>
+              <div class="field"><span>Delivery mode · Duration</span><div class="box" id="f-mode"></div></div>
+              <div class="field"><span>Rubric dimensions</span><div class="box" id="f-dims"></div></div>
+              <div class="field"><span>Prompt sequence</span><div class="box area" id="f-prompts"></div></div>
+              <button class="btn" id="f-submit">Create assessment</button>
+            </div>
+            <div class="card">
+              <h2>Assessments</h2>
+              <div id="assessment-list"><p class="meta" style="color:var(--muted)">No assessments yet.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="teacher-publish">
+          <div class="cols">
+            <div class="card">
+              <h2>Assessments</h2>
+              <div id="publish-list"></div>
+            </div>
+            <div class="card">
+              <h2>Share with learners</h2>
+              <p class="meta" style="color:var(--muted)">Publishing mints a single-use install token bound to this assessment and tenant.</p>
+              <div id="publish-out"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="student">
+          <div class="cols">
+            <div class="card" style="overflow:hidden; display:grid; grid-template-rows:auto 1fr;">
+              <h2>Learner session</h2>
+              <div class="chat" id="chat"></div>
+            </div>
+            <div class="card">
+              <h2>What's happening</h2>
+              <div id="student-side"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="reports">
+          <div class="cols">
+            <div class="card">
+              <h2>Learner's formative report</h2>
+              <div id="report-out"></div>
+            </div>
+            <div class="card">
+              <h2>Class view &amp; export</h2>
+              <div id="class-out"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="outro">
+          <div class="titlecard">
+            <p class="eyebrow">Evidence, not grades</p>
+            <h1>Cited evidence · confidence · next steps</h1>
+            <p>Instructor console at <b>/</b> · learner session at <b>/student.html</b> · MCP tools for AI clients.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="lowerthird">
+        <div class="scene-tag" id="scene-tag">Intro</div>
+        <div class="caption" id="caption">Loading the live demo…</div>
+        <div class="bar"><i id="bar"></i></div>
+        <div class="controls">
+          <button id="btn-restart">↻ Restart</button>
+          <button id="btn-play">⏸ Pause</button>
+          <span class="status" id="status"></span>
+          <span class="time" id="time">0:00 / 3:30</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./director.js"></script>
+  </body>
+</html>
