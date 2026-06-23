@@ -200,3 +200,7 @@ The current implementation still uses a file-backed metadata store and local que
 - S3-compatible storage for artifacts and transcripts
 - Redis-backed jobs instead of the local queue array
 - stronger auth, tenant governance, and deployment-specific URLs
+
+## License
+
+Released under the [MIT License](LICENSE).
