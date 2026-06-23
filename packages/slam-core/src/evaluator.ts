@@ -107,7 +107,7 @@ export function buildStudentReport(
     );
 
     const strong = score >= dimension.scale.max - 1;
-    const developing = score <= Math.ceil((dimension.scale.min + dimension.scale.max) / 2);
+    const developing = !strong && score <= Math.ceil((dimension.scale.min + dimension.scale.max) / 2);
 
     const strengths = strong
       ? [

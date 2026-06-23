@@ -47,6 +47,17 @@ function makeOpaqueToken(prefix: string): string {
   return `${prefix}_${randomBytes(18).toString("base64url")}`;
 }
 
+// RFC 4180 quoting plus spreadsheet formula-injection guarding. Every field is
+// quoted so embedded commas/quotes/newlines can't shift columns, and cells that
+// would be interpreted as a formula are prefixed with a single quote.
+function csvCell(value: string | number): string {
+  let text = String(value);
+  if (/^[=+\-@\t\r]/.test(text)) {
+    text = `'${text}`;
+  }
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new SlamError("validation", message);
@@ -693,7 +704,11 @@ export class SlamService {
       } else {
         state.studentReports.push(report);
       }
-      session.status = "evaluated";
+      // Preserve a terminal "expired" status so late submissions stay
+      // distinguishable from on-time ones after evaluation.
+      if (session.status !== "expired") {
+        session.status = "evaluated";
+      }
       return report;
     });
   }
@@ -754,7 +769,9 @@ export class SlamService {
 
     if (format === "csv") {
       const rows = [
-        ["session_id", "student_id", "student_name", "dimension_id", "dimension_label", "score", "confidence"].join(",")
+        ["session_id", "student_id", "student_name", "dimension_id", "dimension_label", "score", "confidence"]
+          .map(csvCell)
+          .join(",")
       ];
       for (const report of studentReports) {
         for (const dimension of report.dimensionResults) {
@@ -764,10 +781,12 @@ export class SlamService {
               report.studentId,
               report.studentName ?? "",
               dimension.dimensionId,
-              JSON.stringify(dimension.label),
-              String(dimension.score),
-              String(dimension.confidence)
-            ].join(",")
+              dimension.label,
+              dimension.score,
+              dimension.confidence
+            ]
+              .map(csvCell)
+              .join(",")
           );
         }
       }
