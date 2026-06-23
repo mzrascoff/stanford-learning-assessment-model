@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import type {
   AccessToken,
   ActorContext,
@@ -26,6 +26,7 @@ import type {
 import type { DatabaseState } from "./contracts.js";
 import type { ArtifactStore } from "./artifact-store.js";
 import { LocalArtifactStore } from "./artifact-store.js";
+import { SlamError } from "./errors.js";
 import { buildClassReport, buildStudentReport } from "./evaluator.js";
 import { FileStore } from "./file-store.js";
 import { buildStarterAnchors, buildStarterPrompts, getAllStarterDimensions } from "./starter-dimensions.js";
@@ -46,10 +47,37 @@ function makeOpaqueToken(prefix: string): string {
   return `${prefix}_${randomBytes(18).toString("base64url")}`;
 }
 
+// Compare two secrets without leaking their relationship through timing. Both
+// sides are hashed to a fixed length first so timingSafeEqual never sees
+// unequal-length buffers (which would itself reveal length).
+function safeEquals(a: string, b: string): boolean {
+  const digestA = createHash("sha256").update(a).digest();
+  const digestB = createHash("sha256").update(b).digest();
+  return timingSafeEqual(digestA, digestB);
+}
+
+// RFC 4180 quoting plus spreadsheet formula-injection guarding. Every field is
+// quoted so embedded commas/quotes/newlines can't shift columns, and cells that
+// would be interpreted as a formula are prefixed with a single quote.
+function csvCell(value: string | number): string {
+  let text = String(value);
+  if (/^[=+\-@\t\r]/.test(text)) {
+    text = `'${text}`;
+  }
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
-    throw new Error(message);
+    throw new SlamError("validation", message);
   }
+}
+
+function requireText(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new SlamError("validation", `${field} is required.`);
+  }
+  return value;
 }
 
 function normalizeAssessmentInput(input: CreateAssessmentInput): CreateAssessmentInput {
@@ -65,24 +93,48 @@ function normalizeAssessmentInput(input: CreateAssessmentInput): CreateAssessmen
 }
 
 function requireInstructor(actor: ActorContext | null | undefined): asserts actor is ActorContext {
-  assert(actor, "Authentication required.");
-  assert(actor.role === "instructor", "Instructor access required.");
+  if (!actor) {
+    throw new SlamError("unauthorized", "Authentication required.");
+  }
+  if (actor.role !== "instructor") {
+    throw new SlamError("forbidden", "Instructor access required.");
+  }
 }
 
 function requireAuthenticated(actor: ActorContext | null | undefined): asserts actor is ActorContext {
-  assert(actor, "Authentication required.");
+  if (!actor) {
+    throw new SlamError("unauthorized", "Authentication required.");
+  }
 }
 
 function selectAssessment(state: DatabaseState, assessmentId: string): AssessmentBlueprint {
   const assessment = state.assessments.find((entry) => entry.id === assessmentId);
-  assert(assessment, `Assessment ${assessmentId} was not found.`);
+  if (!assessment) {
+    throw new SlamError("not_found", `Assessment ${assessmentId} was not found.`);
+  }
   return assessment;
 }
 
 function selectSession(state: DatabaseState, sessionId: string): AssessmentSession {
   const session = state.sessions.find((entry) => entry.id === sessionId);
-  assert(session, `Session ${sessionId} was not found.`);
+  if (!session) {
+    throw new SlamError("not_found", `Session ${sessionId} was not found.`);
+  }
   return session;
+}
+
+// Cross-tenant access is reported as not-found so the response never confirms
+// the existence of another tenant's resources.
+function assertTenantScope(condition: unknown): asserts condition {
+  if (!condition) {
+    throw new SlamError("not_found", "Resource not found for this tenant.");
+  }
+}
+
+function assertSameStudent(condition: unknown): asserts condition {
+  if (!condition) {
+    throw new SlamError("forbidden", "Student token does not match this session.");
+  }
 }
 
 function selectEvents(state: DatabaseState, sessionId: string): SessionEvent[] {
@@ -137,7 +189,7 @@ export class SlamService {
     }
 
     const state = await this.store.read();
-    const token = state.accessTokens.find((entry) => entry.token === accessToken);
+    const token = state.accessTokens.find((entry) => safeEquals(entry.token, accessToken));
     if (!token || new Date(token.expiresAt).getTime() < Date.now()) {
       return null;
     }
@@ -200,9 +252,9 @@ export class SlamService {
     requireAuthenticated(actor);
     const state = await this.store.read();
     const assessment = selectAssessment(state, assessmentId);
-    assert(assessment.tenantId === actor.tenantId, "Assessment not found for this tenant.");
+    assertTenantScope(assessment.tenantId === actor.tenantId);
     if (actor.role === "student" && actor.assessmentId && actor.assessmentId !== assessmentId) {
-      throw new Error("Student token is not scoped to this assessment.");
+      throw new SlamError("forbidden", "Student token is not scoped to this assessment.");
     }
     return assessment;
   }
@@ -212,7 +264,7 @@ export class SlamService {
 
     return this.store.transaction((state) => {
       const assessment = selectAssessment(state, input.assessmentId);
-      assert(assessment.tenantId === actor.tenantId, "Assessment not found for this tenant.");
+      assertTenantScope(assessment.tenantId === actor.tenantId);
 
       const installToken: InstallToken = {
         id: randomUUID(),
@@ -237,7 +289,7 @@ export class SlamService {
 
   async exchangeInstallToken(input: DeviceExchangeInput): Promise<DeviceExchangeResult> {
     return this.store.transaction((state) => {
-      const installToken = state.installTokens.find((entry) => entry.token === input.installToken);
+      const installToken = state.installTokens.find((entry) => safeEquals(entry.token, input.installToken));
       assert(installToken, "Install token was not found.");
       assert(new Date(installToken.expiresAt).getTime() > Date.now(), "Install token has expired.");
       assert(!installToken.usedAt, "Install token has already been exchanged.");
@@ -306,7 +358,7 @@ export class SlamService {
       const assessmentId = input.assessmentId ?? actor.assessmentId;
       assert(assessmentId, "Assessment id is required.");
       const assessment = selectAssessment(state, assessmentId);
-      assert(assessment.tenantId === actor.tenantId, "Assessment not found for this tenant.");
+      assertTenantScope(assessment.tenantId === actor.tenantId);
 
       const startedAt = nowIso();
       const session: AssessmentSession = {
@@ -342,9 +394,9 @@ export class SlamService {
 
     return this.store.transaction((state) => {
       const session = selectSession(state, sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       this.ensureSessionOpen(session);
 
@@ -370,12 +422,14 @@ export class SlamService {
 
   async submitResponse(input: SubmitResponseInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.promptId, "promptId");
+    requireText(input.content, "content");
 
     return this.store.transaction((state) => {
       const session = selectSession(state, input.sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       this.ensureSessionOpen(session);
 
@@ -396,9 +450,9 @@ export class SlamService {
 
     return this.store.transaction((state) => {
       const session = selectSession(state, input.sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       this.ensureSessionOpen(session);
 
@@ -416,12 +470,13 @@ export class SlamService {
 
   async submitReflection(input: SubmitReflectionInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.content, "content");
 
     return this.store.transaction((state) => {
       const session = selectSession(state, input.sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       this.ensureSessionOpen(session);
 
@@ -438,12 +493,15 @@ export class SlamService {
 
   async uploadArtifact(input: UploadArtifactInput, actor: ActorContext | null): Promise<SessionEvent> {
     requireAuthenticated(actor);
+    requireText(input.name, "name");
+    requireText(input.mimeType, "mimeType");
+    requireText(input.contentBase64, "contentBase64");
 
     return this.store.transaction(async (state) => {
       const session = selectSession(state, input.sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       this.ensureSessionOpen(session);
       const storedArtifact = await this.artifactStore.saveArtifact({
@@ -470,9 +528,9 @@ export class SlamService {
 
     const session = await this.store.transaction((state) => {
       const existing = selectSession(state, sessionId);
-      assert(existing.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(existing.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === existing.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === existing.studentId);
       }
       assert(existing.status === "in_progress", "Session is not active.");
 
@@ -526,7 +584,7 @@ export class SlamService {
     requireInstructor(actor);
     const session = await this.store.transaction(async (state) => {
       const assessment = selectAssessment(state, input.assessmentId);
-      assert(assessment.tenantId === actor.tenantId, "Assessment not found for this tenant.");
+      assertTenantScope(assessment.tenantId === actor.tenantId);
 
       const startedAt = nowIso();
       const createdSession: AssessmentSession = {
@@ -668,7 +726,11 @@ export class SlamService {
       } else {
         state.studentReports.push(report);
       }
-      session.status = "evaluated";
+      // Preserve a terminal "expired" status so late submissions stay
+      // distinguishable from on-time ones after evaluation.
+      if (session.status !== "expired") {
+        session.status = "evaluated";
+      }
       return report;
     });
   }
@@ -692,9 +754,9 @@ export class SlamService {
     requireAuthenticated(actor);
     let report = await this.store.transaction((state) => {
       const session = selectSession(state, sessionId);
-      assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+      assertTenantScope(session.tenantId === actor.tenantId);
       if (actor.role === "student") {
-        assert(actor.studentId === session.studentId, "Student token does not match this session.");
+        assertSameStudent(actor.studentId === session.studentId);
       }
       return state.studentReports.find((entry) => entry.sessionId === sessionId) ?? null;
     });
@@ -729,7 +791,9 @@ export class SlamService {
 
     if (format === "csv") {
       const rows = [
-        ["session_id", "student_id", "student_name", "dimension_id", "dimension_label", "score", "confidence"].join(",")
+        ["session_id", "student_id", "student_name", "dimension_id", "dimension_label", "score", "confidence"]
+          .map(csvCell)
+          .join(",")
       ];
       for (const report of studentReports) {
         for (const dimension of report.dimensionResults) {
@@ -739,10 +803,12 @@ export class SlamService {
               report.studentId,
               report.studentName ?? "",
               dimension.dimensionId,
-              JSON.stringify(dimension.label),
-              String(dimension.score),
-              String(dimension.confidence)
-            ].join(",")
+              dimension.label,
+              dimension.score,
+              dimension.confidence
+            ]
+              .map(csvCell)
+              .join(",")
           );
         }
       }
@@ -786,9 +852,9 @@ export class SlamService {
     requireAuthenticated(actor);
     const state = await this.store.read();
     const session = selectSession(state, sessionId);
-    assert(session.tenantId === actor.tenantId, "Session not found for this tenant.");
+    assertTenantScope(session.tenantId === actor.tenantId);
     if (actor.role === "student") {
-      assert(actor.studentId === session.studentId, "Student token does not match this session.");
+      assertSameStudent(actor.studentId === session.studentId);
     }
 
     return {

@@ -11,6 +11,8 @@ import {
   buildStarterAnchors,
   buildStarterPrompts,
   getAllStarterDimensions,
+  SlamError,
+  statusForError,
   type ActorContext,
   type CreateAssessmentInput
 } from "@slam/core";
@@ -72,7 +74,7 @@ app.use(async (request, _response, next) => {
 function requireAuth(request: express.Request): ActorContext {
   const actor = (request as AuthedRequest).actor;
   if (!actor) {
-    throw new Error("Authentication required.");
+    throw new SlamError("unauthorized", "Authentication required.");
   }
   return actor;
 }
@@ -80,7 +82,7 @@ function requireAuth(request: express.Request): ActorContext {
 function requireInstructor(request: express.Request): ActorContext {
   const actor = requireAuth(request);
   if (actor.role !== "instructor") {
-    throw new Error("Instructor access required.");
+    throw new SlamError("forbidden", "Instructor access required.");
   }
   return actor;
 }
@@ -88,8 +90,20 @@ function requireInstructor(request: express.Request): ActorContext {
 async function buildBundle(installToken: string) {
   const manifestPath = resolve(__dirname, "../../slam-agent/manifest.template.json");
   const serverEntryPath = resolve(__dirname, "../../slam-agent/dist/server/index.js");
-  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
-  const serverEntry = await readFile(serverEntryPath, "utf8");
+  let manifest: Record<string, unknown>;
+  let serverEntry: string;
+  try {
+    manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
+    serverEntry = await readFile(serverEntryPath, "utf8");
+  } catch (cause) {
+    if ((cause as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new SlamError(
+        "internal",
+        "SLAM agent bundle is not built. Run `npm run build` (or `npm --workspace @slam/agent run build`) before serving downloads."
+      );
+    }
+    throw cause;
+  }
 
   const server = manifest.server as {
     type: string;
@@ -289,7 +303,7 @@ app.get("/", (_request, response) => {
 
 app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
   const message = error instanceof Error ? error.message : String(error);
-  response.status(400).send(message);
+  response.status(statusForError(error)).send(message);
 });
 
 app.listen(config.port, () => {

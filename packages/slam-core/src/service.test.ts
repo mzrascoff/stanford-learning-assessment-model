@@ -92,3 +92,85 @@ test("publishes install link and generates reports for a completed session", asy
 
   await rm(dataDir, { recursive: true, force: true });
 });
+
+test("rejects empty required fields and unknown access tokens", async () => {
+  const { dataDir, service, instructor } = await createService();
+  const dimensions = getAllStarterDimensions().slice(0, 1);
+  const assessment = await service.createAssessment(
+    {
+      courseId: "course-demo",
+      title: "Validation check",
+      durationMinutes: 20,
+      deliveryMode: "guided",
+      feedbackVisibility: "instructor_and_student",
+      rubricDimensions: dimensions,
+      anchorExamples: buildStarterAnchors(dimensions),
+      promptSequence: buildStarterPrompts(dimensions),
+      artifactTypes: ["text/plain"]
+    },
+    instructor
+  );
+
+  const published = await service.publishInstallLink({ assessmentId: assessment.id }, instructor);
+  const exchanged = await service.exchangeInstallToken({ installToken: published.installToken.token });
+  const student = await service.authenticate(exchanged.accessToken);
+  assert(student);
+  const session = await service.startAssessment({}, student);
+  const next = await service.nextPrompt(session.id, student);
+  assert(next.prompt);
+
+  await assert.rejects(
+    () => service.submitResponse({ sessionId: session.id, promptId: next.prompt!.id, content: "   " }, student),
+    /content is required/
+  );
+
+  // An unknown / tampered token authenticates to null rather than matching.
+  assert.equal(await service.authenticate("slam_access_not-a-real-token"), null);
+
+  await rm(dataDir, { recursive: true, force: true });
+});
+
+test("CSV export quotes fields and neutralizes formula injection", async () => {
+  const { dataDir, service, instructor } = await createService();
+  const dimensions = getAllStarterDimensions().slice(0, 1);
+  const assessment = await service.createAssessment(
+    {
+      courseId: "course-demo",
+      title: "Export safety",
+      durationMinutes: 20,
+      deliveryMode: "artifact",
+      feedbackVisibility: "instructor_and_student",
+      rubricDimensions: dimensions,
+      anchorExamples: buildStarterAnchors(dimensions),
+      promptSequence: buildStarterPrompts(dimensions),
+      artifactTypes: ["text/plain"]
+    },
+    instructor
+  );
+
+  await service.analyzeArtifact(
+    {
+      assessmentId: assessment.id,
+      studentId: "student-csv",
+      // Comma + quote would break columns; leading "=" is a spreadsheet formula.
+      studentName: '=cmd(),"Doe"',
+      name: "submission.txt",
+      mimeType: "text/plain",
+      contentBase64: Buffer.from("I claim X because Y, and I verified the result.").toString("base64")
+    },
+    instructor
+  );
+
+  const csv = await service.exportResults(assessment.id, "csv", instructor);
+  const lines = csv.body.split("\n");
+  const headerLine = lines[0] ?? "";
+  const dataLine = lines[1] ?? "";
+
+  // Formula-leading cell is prefixed with a quote and the whole field is quoted,
+  // with embedded double-quotes doubled per RFC 4180.
+  assert.match(dataLine, /"'=cmd\(\),""Doe"""/);
+  // The injected comma stays inside its quoted field rather than adding a column.
+  assert.equal(headerLine.split(",").length, 7);
+
+  await rm(dataDir, { recursive: true, force: true });
+});
