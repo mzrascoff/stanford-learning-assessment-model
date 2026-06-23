@@ -4,3 +4,5 @@ dist
 .slam-data
 .env
 .DS_Store
+.slam-demo
+demo/screencast/*.webm
