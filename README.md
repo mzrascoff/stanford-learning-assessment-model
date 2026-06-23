@@ -55,7 +55,9 @@ This creates `EDUC 240 Outcomes Evidence Memo`, six believable learner sessions,
 
 ## Screencast walkthrough
 
-With the API running, an auto-playing ~2-minute walkthrough of the full teacher → learner → reports workflow is served same-origin at [http://localhost:4000/demo/](http://localhost:4000/demo/). It makes the real API calls live, so every score and citation on screen is genuinely computed. The learner side is shown as a Claude chat with inline MCP tool-use cards — the way students actually use SLAM.
+**▶ Watch online (no setup): https://mzrascoff.github.io/stanford-learning-assessment-model/**
+
+An auto-playing ~2-minute walkthrough of the full teacher → learner → reports workflow. The learner side is shown as a Claude chat with inline MCP tool-use cards — the way students actually use SLAM. The hosted version runs on canned data captured from a real run (scores and citations are genuine); when served by a running API at [http://localhost:4000/demo/](http://localhost:4000/demo/) it makes the calls live instead.
 
 Render it to a video file headlessly — no display or manual screen capture:
 
