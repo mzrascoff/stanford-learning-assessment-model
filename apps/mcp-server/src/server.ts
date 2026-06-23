@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { SlamApiClient, createSlamMcpServer } from "@slam/core";
+import { SlamApiClient, createSlamMcpServer, statusForError } from "@slam/core";
 
 const config = {
   port: Number(process.env.SLAM_MCP_PORT ?? 4100),
@@ -80,7 +80,7 @@ app.all("/mcp", async (request, response) => {
     await transport.handleRequest(request, response, request.body);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    response.status(400).json({ error: message });
+    response.status(statusForError(error)).json({ error: message });
   }
 });
 

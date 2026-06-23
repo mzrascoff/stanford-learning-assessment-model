@@ -11,6 +11,8 @@ import {
   buildStarterAnchors,
   buildStarterPrompts,
   getAllStarterDimensions,
+  SlamError,
+  statusForError,
   type ActorContext,
   type CreateAssessmentInput
 } from "@slam/core";
@@ -72,7 +74,7 @@ app.use(async (request, _response, next) => {
 function requireAuth(request: express.Request): ActorContext {
   const actor = (request as AuthedRequest).actor;
   if (!actor) {
-    throw new Error("Authentication required.");
+    throw new SlamError("unauthorized", "Authentication required.");
   }
   return actor;
 }
@@ -80,7 +82,7 @@ function requireAuth(request: express.Request): ActorContext {
 function requireInstructor(request: express.Request): ActorContext {
   const actor = requireAuth(request);
   if (actor.role !== "instructor") {
-    throw new Error("Instructor access required.");
+    throw new SlamError("forbidden", "Instructor access required.");
   }
   return actor;
 }
@@ -289,7 +291,7 @@ app.get("/", (_request, response) => {
 
 app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
   const message = error instanceof Error ? error.message : String(error);
-  response.status(400).send(message);
+  response.status(statusForError(error)).send(message);
 });
 
 app.listen(config.port, () => {
