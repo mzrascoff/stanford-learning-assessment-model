@@ -71,21 +71,37 @@ async function type(node, text, perChar = 16) {
   node.classList.remove("cursor");
 }
 
-function bubble(host, kind, who, text) {
+// A Claude chat message. Assistant messages get the ✳ avatar; the returned
+// node is the text body so type() can stream into it.
+function claudeMsg(host, role) {
   const node = document.createElement("div");
-  node.className = `bubble ${kind}`;
-  if (who) node.innerHTML = `<span class="who">${who}</span>`;
+  node.className = `cmsg ${role}`;
+  if (role === "assistant") node.innerHTML = `<span class="av">✳</span><span class="body"></span>`;
   host.appendChild(node);
   host.scrollTop = host.scrollHeight;
-  return node;
+  return role === "assistant" ? node.querySelector(".body") : node;
 }
-function chip(host, text, cls = "metachip") {
-  const node = document.createElement("div");
-  node.className = cls;
-  node.textContent = text;
-  host.appendChild(node);
+
+// An MCP tool-use card, the way an AI client surfaces a tool call: a brief
+// "running" state, then the result summary.
+async function toolCard(host, name, summary) {
+  const card = document.createElement("div");
+  card.className = "tool-card";
+  card.innerHTML =
+    `<div class="thead"><span class="ticon">⚒</span>` +
+    `<span class="tname">SLAM · ${name}</span>` +
+    `<span class="tstatus"><span class="spin">↻</span> running</span></div>`;
+  host.appendChild(card);
   host.scrollTop = host.scrollHeight;
-  return node;
+  await wait(650);
+  card.querySelector(".tstatus").className = "tstatus ok";
+  card.querySelector(".tstatus").textContent = "✓ done";
+  const res = document.createElement("div");
+  res.className = "tres";
+  res.textContent = `→ ${summary}`;
+  card.appendChild(res);
+  host.scrollTop = host.scrollHeight;
+  return card;
 }
 
 // ---- the choreographed run ----
@@ -141,23 +157,24 @@ async function sequence() {
     `<p class="meta">Token binds the learner to this assessment + tenant.</p></div>`;
   await wait(3200);
 
-  // Scene 4 — student session
-  scene("student"); setUrl("localhost:4000/student.html  ·  Learner"); setProgress(0.50);
-  say("Learner · Session", "The learner opens the link — it exchanges the install token for a scoped session.");
-  const chat = $("#chat"); const side = $("#student-side"); chat.innerHTML = ""; side.innerHTML = "";
-  const toolLog = (name) => chip(side, `▸ ${name}  ✓`, "chip");
-  side.innerHTML = `<p class="meta" style="color:var(--muted)">Each learner action maps to an MCP tool the AI client calls:</p>`;
+  // Scene 4 — the learner works inside Claude; the SLAM MCP agent supplies the tools
+  scene("student"); setUrl("claude.ai  ·  Claude  ·  SLAM connected"); setProgress(0.50);
+  say("Learner · In Claude", "The learner works inside Claude. The installed SLAM MCP agent gives Claude the assessment tools.");
+  const thread = $("#thread");
+  thread.innerHTML = "";
 
+  // On first launch the agent silently exchanges the install token for a scoped token.
   const exchanged = await api("/device-links/exchange", {
-    method: "POST", body: JSON.stringify({ installToken, clientName: "SLAM Web Learner" })
+    method: "POST", body: JSON.stringify({ installToken, clientName: "Claude" })
   });
   const ST = exchanged.accessToken;
-  toolLog("exchange_install_token");
-  const instructions = await api(`/instructions?assessmentId=${assessment.id}`, { method: "GET" }, ST);
+
+  await type(claudeMsg(thread, "user"), "I'm ready to start my EDUC 240 assessment.", 13);
+  await wait(450);
+  await type(claudeMsg(thread, "assistant"), "Great — I'll start your session and pull up the first prompt.", 11);
   let session = await api("/sessions", { method: "POST", body: JSON.stringify({ assessmentId: assessment.id }) }, ST);
-  toolLog("start_assessment");
-  await type(bubble(chat, "assistant", "SLAM"), instructions.instructions.split("\n").slice(0, 2).join(" — "), 8);
-  await wait(900);
+  await toolCard(thread, "start_assessment", `session started · ${assessment.durationMinutes} min`);
+  await wait(500);
 
   const answers = [
     "The section is only partly meeting the outcome: the claim–evidence pass rate is 58%, and first-gen students trail continuing-gen (64% vs 78%). Because lab-note completion is high (91%), the gap looks like reasoning support, not effort — so I recommend a calibrated re-assessment with worked exemplars.",
@@ -166,35 +183,40 @@ async function sequence() {
 
   for (let i = 0; ; i += 1) {
     const next = await api(`/sessions/${session.id}/next-prompt`, { method: "POST" }, ST);
-    toolLog("next_prompt");
     session = next.session;
+    await toolCard(thread, "next_prompt", next.prompt ? `prompt ${session.currentPromptIndex + 1} of ${assessment.promptSequence.length}` : "no more prompts");
     if (!next.prompt) break;
     const p = next.prompt;
-    await type(bubble(chat, "assistant", `Prompt ${session.currentPromptIndex + 1}`), p.prompt, 9);
-    if (p.guidance) chip(chat, `Guidance: ${p.guidance}`, "bubble guidance");
-    await wait(700);
-    say("Learner · Session", p.responseType === "reflection" ? "Reflection prompts capture monitoring and calibration." : "The learner responds with a claim grounded in evidence.");
-    await type(bubble(chat, "learner", "Jordan"), answers[i] ?? answers[answers.length - 1], 8);
+    await type(claudeMsg(thread, "assistant"), `Prompt ${session.currentPromptIndex + 1}: ${p.prompt}`, 8);
+    await wait(450);
+    say("Learner · In Claude", p.responseType === "reflection" ? "Reflection prompts capture monitoring and calibration." : "The learner answers with a claim grounded in evidence.");
+    await type(claudeMsg(thread, "user"), answers[i] ?? answers[answers.length - 1], 8);
+    await wait(300);
+    await type(
+      claudeMsg(thread, "assistant"),
+      p.responseType === "reflection" ? "Saving your reflection and confidence." : "Recording your response and confidence.",
+      11
+    );
 
     if (p.responseType === "reflection") {
       await api(`/sessions/${session.id}/reflections`, { method: "POST", body: JSON.stringify({ content: answers[i] ?? answers[1], focus: "monitoring" }) }, ST);
-      toolLog("submit_reflection");
+      await toolCard(thread, "submit_reflection", "reflection saved");
     } else {
       await api(`/sessions/${session.id}/responses`, { method: "POST", body: JSON.stringify({ promptId: p.id, content: answers[i] ?? answers[0] }) }, ST);
-      toolLog("submit_response");
+      await toolCard(thread, "submit_response", "response saved");
     }
-
-    const dots = chip(chat, "", "metachip");
-    dots.innerHTML = `Confidence: <span class="dots">${[1, 2, 3, 4, 5].map((n) => `<i data-n="${n}">${n}</i>`).join("")}</span>`;
-    for (let n = 1; n <= 4; n += 1) { dots.querySelector(`[data-n="${n}"]`).classList.add("on"); await wait(160); }
     await api(`/sessions/${session.id}/confidence`, { method: "POST", body: JSON.stringify({ promptId: p.id, value: 4 }) }, ST);
-    toolLog("record_confidence");
-    await wait(1100);
+    await toolCard(thread, "record_confidence", "confidence 4 / 5");
+    await wait(700);
   }
 
-  // Scene 5 — submit + reports
-  scene("reports"); setUrl("localhost:4000  ·  Reports"); setProgress(0.80);
-  say("Insight · Report", "Submitting runs the evaluator: scores with cited evidence, confidence, and next steps.");
+  // Scene 5 — Claude submits (end_assessment); the evaluator returns the report
+  await type(claudeMsg(thread, "user"), "That's everything — please submit it.", 13);
+  await type(claudeMsg(thread, "assistant"), "Submitting now. I'll bring back your formative report.", 11);
+  await toolCard(thread, "end_assessment", "session submitted for evaluation");
+  await wait(500);
+  scene("reports"); setUrl("localhost:4000  ·  Instructor console · Reports"); setProgress(0.80);
+  say("Insight · Report", "The evaluator returns scores with cited evidence, confidence, and next steps — visible to learner and instructor.");
   session = await api(`/sessions/${session.id}/complete`, { method: "POST" }, ST);
   const report = await api(`/reports/student/${session.id}`, { method: "GET" }, ST);
   const out = $("#report-out");
